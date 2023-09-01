@@ -12,6 +12,7 @@ slackEvents.on('message', async (event, respond) => {
     const message = await Message.findOne({ slackId: event.previous_message.client_msg_id });
 
     message.text = event.message.text;
+    message.modifiedDate = new Date(parseInt(event.message.edited.ts) * 1000).toISOString();
 
     const updatedMessage = await message.save();
     console.log(`Message updated to MongoDB: ${updatedMessage.text}`);
