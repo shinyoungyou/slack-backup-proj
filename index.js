@@ -2,15 +2,22 @@ require('dotenv').config();
 
 const express = require('express')
 const app = express()
+const morgan = require('morgan');
+const cors = require("cors");
 const cookieParser = require('cookie-parser');
+const credentials = require('./middlewares/credentials');
+const helmet = require('helmet');
 const mongoose = require('mongoose')
 const connectDB = require('./config/dbConn')
-const Message = require('./models/Message.js');
+const slackEvents = require('./routes/slackEvents');
 const PORT = process.env.PORT || 3500
 
 console.log(process.env.NODE_ENV)
 
 connectDB()
+
+// Plug in the Slack Events Adapter before the body parsing middleware
+app.use('/slackevent', slackEvents.requestListener());
 
 // Body parser
 app.use(express.json())
@@ -19,59 +26,36 @@ app.use(express.urlencoded({ extended: true }))
 //middleware for cookies
 app.use(cookieParser());
 
-// Require the Node Slack SDK package (github.com/slackapi/node-slack-sdk)
-const { WebClient, LogLevel } = require("@slack/web-api");
+// Handle options credentials check - before CORS!
+// and fetch cookies credentials requirement
+app.use(credentials);
 
-// WebClient instantiates a client that can call API methods
-// When using Bolt, you can use either `app.client` or the `client` passed to listeners.
-const client = new WebClient(process.env.SLACK_BOT_TOKEN, {
-  // LogLevel can be imported and used to make debugging simpler
-  logLevel: LogLevel.DEBUG
-});
-
-// Store conversation history
-let conversationHistory;
-// ID of channel you watch to fetch the history for
-let channelId = process.env.SLACK_CHANNEL;
-
-const getMessages = async () => {
-  try {
-    // Call the conversations.history method using WebClient
-    const result = await client.conversations.history({
-      channel: channelId,
-      limit: 10
-    });
-  
-    conversationHistory = result.messages;
-
-    try {
-      for (const message of conversationHistory) {
-        const newMessage = new Message({
-          slackId: message.client_msg_id,
-          text: message.text,
-          user: message.user,
-          channel: channelId,
-          postedDate: new Date(parseInt(message.ts) * 1000).toISOString(),
-          modifiedDate: message.edited ? new Date(parseInt(message.edited.ts) * 1000).toISOString() : null,
-        });
-  
-        await newMessage.save();
-        console.log(`Message saved to MongoDB: ${newMessage.text}`);
-      }
-    } catch (error) {
-      console.error('Error saving messages:', error);
-    }
-  
-    // Print results
-    console.log(conversationHistory.length + " messages found in " + channelId);
-    console.log(conversationHistory);
-  }
-  catch (error) {
-    console.error(error);
-  }
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(cors({
+    // origin: 'https://slack-backup-proj.com',
+    // credentials: true,
+  })); 
+} else {
+  app.use(morgan('dev'));
+  app.use(cors({
+    origin: [
+      'https://api.slack.com/',
+      'http://localhost:3000'
+    ],
+    credentials: true,
+  })); 
 }
 
-getMessages();
+app.post('/', (req, res) => {
+  const { challenge } = req.body;
+  if (challenge) {
+    res.send({ challenge });
+  } else {
+    res.send('Hello World!');
+  }
+});
 
 mongoose.connection.once('open', () => {
   console.log('Connected to MongoDB')
