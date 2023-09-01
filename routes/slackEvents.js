@@ -1,4 +1,8 @@
 const { createEventAdapter } = require('@slack/events-api');
+const { WebClient, LogLevel } = require("@slack/web-api");
+const client = new WebClient(process.env.SLACK_BOT_TOKEN, {
+  logLevel: LogLevel.DEBUG
+});
 const Message = require('../models/Message');
 
 // Initialize the Slack Events Adapter
@@ -8,7 +12,7 @@ slackEvents.on('message', async (event, respond) => {
   console.log(event);
 
   if (event.subtype === 'message_changed') {
-    
+
     const message = await Message.findOne({ slackId: event.previous_message.client_msg_id });
 
     message.text = event.message.text;
@@ -25,10 +29,17 @@ slackEvents.on('message', async (event, respond) => {
 
   } else {
 
+    // Fetch user info using the user's ID
+    const userResponse = await client.users.info({ user: event.user });
+    const displayName = userResponse.user.profile.real_name;
+    const userPicturePath = userResponse.user.profile.image_48;
+
     const newMessage = new Message({
       slackId: event.client_msg_id,
       text: event.text,
-      user: event.user,
+      userId: event.user,
+      displayName,
+      userPicturePath,
       channel: event.channel,
       postedDate: new Date(parseInt(event.ts) * 1000).toISOString(),
     });

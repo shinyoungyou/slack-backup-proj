@@ -7,7 +7,13 @@ const MessageSchema = new mongoose.Schema({
   text: {
     type: String,
   },
-  user: {
+  userId: {
+    type: String,
+  },
+  displayName: {
+    type: String,
+  },
+  userPicturePath: {
     type: String,
   },
   channel: {
