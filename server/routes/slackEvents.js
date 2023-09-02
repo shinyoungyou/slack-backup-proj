@@ -44,29 +44,6 @@ slackEvents.on('message', async (event, respond) => {
       postedDate: new Date(parseInt(event.ts) * 1000).toISOString(),
     });
 
-    if (event.subtype === 'file_share') {
-      const fileList = event.files.map(async (file) => {
-        console.log(file);
-        const fileListResponse = await client.files.list({ 
-          user: event.user,
-          // ts_from: `${file.created-1}`, ts_to: `${file.created+1}`
-        });
-        console.log(fileListResponse);
-        const fileData = fileListResponse.files[0];
-        const publicUrl = fileData.is_public ? fileData.permalink_public : null;
-    
-        return {
-          id: file.id,
-          title: file.title,
-          picturePath: publicUrl
-        }
-      })
-
-      console.log(fileList);
-
-      newMessage.files = fileList;
-    }
-
     await newMessage.save();
     console.log(`Message saved to MongoDB: ${newMessage.text}`);
   } 
