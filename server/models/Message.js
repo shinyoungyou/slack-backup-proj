@@ -16,6 +16,13 @@ const MessageSchema = new mongoose.Schema({
   userPicturePath: {
     type: String,
   },
+  files: {
+    type: [{
+      id: String,
+      title: String,
+      picturePath: String
+    }]
+  },
   channel: {
     type: String,
   },

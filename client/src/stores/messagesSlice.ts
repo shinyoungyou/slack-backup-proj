@@ -1,17 +1,17 @@
 import { createAsyncThunk, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
 import agent from "@/apis/agent";
-import { Message } from "@/models/Message";
+import { Message } from "@/models/message";
 import { RootState } from "@/stores/configureStore";
 
 interface MessagesState {
-    MessagesLoaded: boolean;
+    messagesLoaded: boolean;
     status: string;
 }
 
 const messagesAdapter = createEntityAdapter<Message>();
 
 export const fetchMessagesAsync = createAsyncThunk<Message[], void, {state: RootState}>(
-    'Messages/fetchMessagesAsync',
+    'messages/fetchMessagesAsync',
     async (_, thunkAPI) => {
         try {
             return await agent.Messages.list();
@@ -22,7 +22,7 @@ export const fetchMessagesAsync = createAsyncThunk<Message[], void, {state: Root
 )
 
 export const fetchMessageAsync = createAsyncThunk<Message, string>(
-    'Messages/fetchMessageAsync',
+    'messages/fetchMessageAsync',
     async (MessageId, thunkAPI) => {
         try {
             const Message = await agent.Messages.details(MessageId);
@@ -33,20 +33,20 @@ export const fetchMessageAsync = createAsyncThunk<Message, string>(
     }
 )
 
-export const MessagesSlice = createSlice({
-    name: 'Messages',
+export const messagesSlice = createSlice({
+    name: 'messages',
     initialState: messagesAdapter.getInitialState<MessagesState>({
-        MessagesLoaded: false,
+        messagesLoaded: false,
         status: 'idle',
     }),
     reducers: {
         setMessage: (state, action) => {
             messagesAdapter.upsertOne(state, action.payload);
-            state.MessagesLoaded = false;
+            state.messagesLoaded = false;
         },
         removeMessage: (state, action) => {
             messagesAdapter.removeOne(state, action.payload);
-            state.MessagesLoaded = false;
+            state.messagesLoaded = false;
         }
     },
     extraReducers: (builder => {
@@ -56,7 +56,7 @@ export const MessagesSlice = createSlice({
         builder.addCase(fetchMessagesAsync.fulfilled, (state, action) => {
             messagesAdapter.setAll(state, action.payload);
             state.status = 'idle';
-            state.MessagesLoaded = true;
+            state.messagesLoaded = true;
         });
         builder.addCase(fetchMessagesAsync.rejected, (state, action) => {
             console.log(action.payload);
@@ -76,6 +76,6 @@ export const MessagesSlice = createSlice({
     })
 })
 
-export const MessageSelectors = messagesAdapter.getSelectors((state: RootState) => state.Messages);
+export const messageSelectors = messagesAdapter.getSelectors((state: RootState) => state.messages);
 
-export const { setMessage, removeMessage } = MessagesSlice.actions;
+export const { setMessage, removeMessage } = messagesSlice.actions;
