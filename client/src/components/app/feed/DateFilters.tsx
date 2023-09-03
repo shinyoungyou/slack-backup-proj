@@ -9,9 +9,10 @@ import { format, addDays } from "date-fns";
 
 interface Props {
   group: string;
+  scrollToSpecificDate: (date: string) => void;
 }
 
-export default function DateFilters({ group }: Props) {
+export default function DateFilters({ group, scrollToSpecificDate }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [viewCalendar, setViewCalendar] = useState<boolean>(false);
 
@@ -32,6 +33,17 @@ export default function DateFilters({ group }: Props) {
   const yesterdayFormatted = format(addDays(new Date(), -1), "EEE, MMM dd yyyy");
 
   const groupWithoutYear = group.slice(0, -5);
+
+  const handleDateClick = (date: string) => {
+    if (date === 'today') {
+      scrollToSpecificDate(todayFormatted); 
+    } else if (date === 'yesterday') {
+      scrollToSpecificDate(yesterdayFormatted); 
+    } else {
+      scrollToSpecificDate(date);
+    }
+    setAnchorEl(null);
+  };
 
   return (
     <>
@@ -60,26 +72,25 @@ export default function DateFilters({ group }: Props) {
       >
         <MenuItem disabled>Jump to...</MenuItem>
         {group === todayFormatted ? (
-          <>
-            <MenuItem onClick={handleClose}>Yesterday</MenuItem>
+            <MenuItem onClick={() => handleDateClick("yesterday")}>Yesterday</MenuItem>
            
-          </>
         ) : group === yesterdayFormatted ? (
-          <>
-            <MenuItem onClick={handleClose}>Today</MenuItem>
-          </>
+            <MenuItem onClick={() => handleDateClick("today")}>Today</MenuItem>
         ) : (
-          <>
-            <MenuItem onClick={handleClose}>Today</MenuItem>
-            <MenuItem onClick={handleClose}>Yesterday</MenuItem>
-          </>
+          <div>
+            <MenuItem onClick={() => handleDateClick("today")}>Today</MenuItem>
+            <MenuItem onClick={() => handleDateClick("yesterday")}>Yesterday</MenuItem>
+          </div>
         )}
         <Divider sx={{ my: 0.5 }} />
         <MenuItem onClick={() => handleCalendar(true)}>Jump to a specific date</MenuItem>
       </Menu>
 
       {viewCalendar && <Calendar
-        onChange={(date: any) => handleCalendar(false)}
+        onChange={(date: any) => {
+          handleDateClick(format(date, "EEE, MMM dd yyyy"));
+          handleCalendar(false);
+        }}
       />}
     </>
   );
