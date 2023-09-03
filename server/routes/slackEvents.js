@@ -16,7 +16,7 @@ slackEvents.on('message', async (event, respond) => {
     const message = await Message.findOne({ slackId: event.previous_message.client_msg_id });
 
     message.text = event.message.text;
-    message.modifiedDate = new Date(parseInt(event.message.edited.ts) * 1000).toISOString();
+    message.modifiedDate = new Date(parseInt(event.message.edited.ts) * 1000);
 
     const updatedMessage = await message.save();
     console.log(`Message updated to MongoDB: ${updatedMessage.text}`);
@@ -41,7 +41,8 @@ slackEvents.on('message', async (event, respond) => {
       displayName,
       userPicturePath,
       channel: event.channel,
-      postedDate: new Date(parseInt(event.ts) * 1000).toISOString(),
+      postedDate: new Date(parseInt(event.ts) * 1000),
+      // modifiedDate: null
     });
 
     await newMessage.save();

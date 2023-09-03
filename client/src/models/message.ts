@@ -6,6 +6,6 @@ export interface Message {
   displayName: string;
   userPicturePath: string;
   channel: string;
-  postedDate: string;
-  modifiedDate: string;
+  postedDate: Date;
+  modifiedDate: Date | null;
 }

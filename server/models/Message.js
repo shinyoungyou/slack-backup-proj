@@ -20,10 +20,10 @@ const MessageSchema = new mongoose.Schema({
     type: String,
   },
   postedDate: {
-    type: String,
+    type: Date,
   },
   modifiedDate: {
-    type: String,
+    type: Date,
   }
 }, {
   timestamps: true // automatic dates for when it's created or updated

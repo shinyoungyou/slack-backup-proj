@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Calendar from "react-calendar";
-import Button from "@mui/material/Button";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import Divider from "@mui/material/Divider";
-import { DateTime } from "luxon";
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import Divider from '@mui/material/Divider';
+import { format, addDays } from "date-fns";
 
 interface Props {
   group: string;
@@ -14,21 +14,11 @@ interface Props {
 export default function DateFilters({ group }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [viewCalendar, setViewCalendar] = useState<boolean>(false);
-  const [formattedDate, setFormattedDate] = useState<string>("");
 
   const open = Boolean(anchorEl);
-
-  useEffect(() => {
-    const formattedGroupDate = DateTime.fromISO(group, {
-      zone: "UTC",
-    }).toFormat("EEE, MMM dd");
-    setFormattedDate(formattedGroupDate);
-  }, [group]);
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -38,10 +28,10 @@ export default function DateFilters({ group }: Props) {
     setViewCalendar(isOpen);
   };
 
-  const todayFormatted = DateTime.now().toFormat("EEE, MMM dd");
-  const yesterdayFormatted = DateTime.now()
-    .minus({ days: 1 })
-    .toFormat("EEE, MMM dd");
+  const todayFormatted = format(new Date(), "EEE, MMM dd yyyy");
+  const yesterdayFormatted = format(addDays(new Date(), -1), "EEE, MMM dd yyyy");
+
+  const groupWithoutYear = group.slice(0, -5);
 
   return (
     <>
@@ -53,11 +43,11 @@ export default function DateFilters({ group }: Props) {
         onClick={handleClick}
         endIcon={<KeyboardArrowDownIcon />}
       >
-        {formattedDate === todayFormatted
+        {group === todayFormatted
           ? "Today"
-          : formattedDate === yesterdayFormatted
+          : group === yesterdayFormatted
           ? "Yesterday"
-          : formattedDate}
+          : groupWithoutYear}
       </Button>
       <Menu
         id="basic-menu"
@@ -69,11 +59,12 @@ export default function DateFilters({ group }: Props) {
         }}
       >
         <MenuItem disabled>Jump to...</MenuItem>
-        {formattedDate === todayFormatted ? (
+        {group === todayFormatted ? (
           <>
             <MenuItem onClick={handleClose}>Yesterday</MenuItem>
+           
           </>
-        ) : formattedDate === yesterdayFormatted ? (
+        ) : group === yesterdayFormatted ? (
           <>
             <MenuItem onClick={handleClose}>Today</MenuItem>
           </>
@@ -84,14 +75,12 @@ export default function DateFilters({ group }: Props) {
           </>
         )}
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={() => handleCalendar(true)}>
-          Jump to a specific date
-        </MenuItem>
+        <MenuItem onClick={() => handleCalendar(true)}>Jump to a specific date</MenuItem>
       </Menu>
 
-      {viewCalendar && (
-        <Calendar onChange={(date: any) => handleCalendar(false)} />
-      )}
+      {viewCalendar && <Calendar
+        onChange={(date: any) => handleCalendar(false)}
+      />}
     </>
   );
-}
+};

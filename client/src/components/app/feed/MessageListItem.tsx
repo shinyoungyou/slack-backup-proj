@@ -24,7 +24,7 @@ export default function MessageListItem({ message }: Props) {
           <Avatar alt={message.displayName} src={message.userPicturePath} />
         }
         title={message.displayName}
-        subheader={format(new Date(message.postedDate), 'h:mm a')}
+        subheader={format(message.postedDate, 'h:mm a')}
         titleTypographyProps={{
           sx: { fontWeight: "bold", color: "primary.main" },
         }}

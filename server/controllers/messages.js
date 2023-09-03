@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 /* READ */
 exports.getMessages = async (req, res) => {
   try {
-    const messages = await Message.find();
+    const messages = await Message.find().select('-createdAt -updatedAt');;
 
     res.status(200).json(messages);
   } catch (err) {

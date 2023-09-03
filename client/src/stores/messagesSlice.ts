@@ -2,6 +2,7 @@ import { createSelector, createAsyncThunk, createEntityAdapter, createSlice, leg
 import agent from "@/apis/agent";
 import { Message } from "@/models/message";
 import { RootState } from "@/stores/configureStore";
+import { format } from 'date-fns';
 
 interface MessagesState {
     messagesLoaded: boolean;
@@ -17,9 +18,8 @@ const { selectAll } = messagesAdapter.getSelectors((state: RootState) => state.m
 export const selectMessagesByDate = createSelector(
   [selectAll],
   (messages) => {
-    console.log(messages);
-    
-    return messages.slice().sort((a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+    console.log(messages);    
+    return messages.slice().sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime());
   }
 );
 
@@ -29,7 +29,8 @@ export const selectGroupedMessages = createSelector(
   (messagesByDate) => {
     return Object.entries(
       messagesByDate.reduce((groupedMessages, message) => {
-        const dateKey = new Date(message.postedDate).toISOString().split('T')[0];
+        
+        const dateKey = format(message.postedDate, 'EEE, MMM dd yyyy');
         if (!groupedMessages[dateKey]) {
           groupedMessages[dateKey] = [];
         }
@@ -84,6 +85,10 @@ export const messagesSlice = createSlice({
             state.status = 'pendingFetchMessages'
         });
         builder.addCase(fetchMessagesAsync.fulfilled, (state, action) => {
+            // Convert the postedDate field from string to Date for each message
+            action.payload.forEach((message) => {
+                message.postedDate = new Date(message.postedDate)!;
+            });
             messagesAdapter.setAll(state, action.payload);
             state.status = 'idle';
             state.messagesLoaded = true;
