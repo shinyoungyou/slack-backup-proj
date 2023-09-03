@@ -20,9 +20,12 @@
     "@types/react-dom": "^18.0.9",
     "@types/react-infinite-scroller": "^1.2.3",
     "axios": "^1.2.0",
-    "jwt-decode": "^3.1.2",
     "date-fns": "^2.29.3",
+    "jwt-decode": "^3.1.2",
+    "luxon": "^3.4.2",
     "react": "^18.2.0",
+    "react-calendar": "^4.0.0",
+    "react-datepicker": "^4.8.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.43.1",
@@ -63,7 +66,10 @@
     ]
   },
   "devDependencies": {
+    "@types/luxon": "^3.3.2",
     "@types/node": "^20.5.1",
+    "@types/react-calendar": "^3.9.0",
+    "@types/react-datepicker": "^4.8.0",
     "@types/styled-components": "^5.1.26",
     "@types/yup": "^0.32.0"
   }

@@ -27,7 +27,7 @@ slackEvents.on('message', async (event, respond) => {
 
     console.log(`Message deleted`);
 
-  } else {
+  } else if (event.subtype === undefined) {
 
     // Fetch user info using the user's ID
     const userResponse = await client.users.info({ user: event.user });

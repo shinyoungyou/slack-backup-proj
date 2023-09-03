@@ -1,4 +1,4 @@
-import { createAsyncThunk, createEntityAdapter, createSlice } from "@reduxjs/toolkit";
+import { createSelector, createAsyncThunk, createEntityAdapter, createSlice, legacy_createStore } from "@reduxjs/toolkit";
 import agent from "@/apis/agent";
 import { Message } from "@/models/message";
 import { RootState } from "@/stores/configureStore";
@@ -9,6 +9,36 @@ interface MessagesState {
 }
 
 const messagesAdapter = createEntityAdapter<Message>();
+
+// Selectors
+const { selectAll } = messagesAdapter.getSelectors((state: RootState) => state.messages);
+
+// Selector to get messages sorted by date
+export const selectMessagesByDate = createSelector(
+  [selectAll],
+  (messages) => {
+    console.log(messages);
+    
+    return messages.slice().sort((a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+  }
+);
+
+// Selector to group messages by date
+export const selectGroupedMessages = createSelector(
+  [selectMessagesByDate],
+  (messagesByDate) => {
+    return Object.entries(
+      messagesByDate.reduce((groupedMessages, message) => {
+        const dateKey = new Date(message.postedDate).toISOString().split('T')[0];
+        if (!groupedMessages[dateKey]) {
+          groupedMessages[dateKey] = [];
+        }
+        groupedMessages[dateKey].push(message);
+        return groupedMessages;
+      }, {} as { [key: string]: Message[] })
+    );
+  }
+);
 
 export const fetchMessagesAsync = createAsyncThunk<Message[], void, {state: RootState}>(
     'messages/fetchMessagesAsync',
