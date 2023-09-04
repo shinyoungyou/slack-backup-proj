@@ -18,7 +18,6 @@
     "@types/jest": "^27.5.2",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.9",
-    "@types/react-infinite-scroller": "^1.2.3",
     "axios": "^1.2.0",
     "date-fns": "^2.29.3",
     "jwt-decode": "^3.1.2",
@@ -68,6 +67,7 @@
     "@types/node": "^20.5.1",
     "@types/react-calendar": "^3.9.0",
     "@types/react-datepicker": "^4.8.0",
+    "@types/react-infinite-scroller": "^1.2.3",
     "@types/styled-components": "^5.1.26",
     "@types/yup": "^0.32.0"
   }

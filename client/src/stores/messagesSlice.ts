@@ -3,10 +3,13 @@ import agent from "@/apis/agent";
 import { Message } from "@/models/message";
 import { RootState } from "@/stores/configureStore";
 import { format } from 'date-fns';
+import { MessageParams, Pagination } from '@/models/pagination';
 
 interface MessagesState {
     messagesLoaded: boolean;
     status: string;
+    messageParams: MessageParams;
+    pagination: Pagination | null;
 }
 
 const messagesAdapter = createEntityAdapter<Message>();
@@ -41,11 +44,22 @@ export const selectGroupedMessages = createSelector(
   }
 );
 
+function getAxiosParams(messageParams: MessageParams) {
+    const params = new URLSearchParams();
+    params.append('pageNumber', messageParams.pageNumber.toString());
+    params.append('pageSize', messageParams.pageSize.toString());
+    // if (messageParams.searchTerm) params.append('searchTerm', messageParams.searchTerm);
+    return params;
+}
+
 export const fetchMessagesAsync = createAsyncThunk<Message[], void, {state: RootState}>(
     'messages/fetchMessagesAsync',
     async (_, thunkAPI) => {
+        const params = getAxiosParams(thunkAPI.getState().messages.messageParams)
         try {
-            return await agent.Messages.list();
+            const response = await agent.Messages.list(params);            
+            thunkAPI.dispatch(setPagination(response.pagination));
+            return response.data;
         } catch (error: any) {
             return thunkAPI.rejectWithValue({error: error.data})
         }
@@ -56,29 +70,52 @@ export const fetchMessageAsync = createAsyncThunk<Message, string>(
     'messages/fetchMessageAsync',
     async (MessageId, thunkAPI) => {
         try {
-            const Message = await agent.Messages.details(MessageId);
-            return Message;
+            const message = await agent.Messages.details(MessageId);
+            return message;
         } catch (error: any) {
             return thunkAPI.rejectWithValue({error: error.data})
         }
     }
 )
 
+function initParams(): MessageParams {
+    return {
+        pageNumber: 1,
+        pageSize: 4,
+    }
+}
+
 export const messagesSlice = createSlice({
     name: 'messages',
     initialState: messagesAdapter.getInitialState<MessagesState>({
         messagesLoaded: false,
         status: 'idle',
+        messageParams: initParams(),
+        pagination: null
     }),
     reducers: {
-        setMessage: (state, action) => {
-            messagesAdapter.upsertOne(state, action.payload);
+        // setMessage: (state, action) => {
+        //     messagesAdapter.upsertOne(state, action.payload);
+        //     state.messagesLoaded = false;
+        // },
+        // removeMessage: (state, action) => {
+        //     messagesAdapter.removeOne(state, action.payload);
+        //     state.messagesLoaded = false;
+        // },
+        setMessageParams: (state, action) => {
             state.messagesLoaded = false;
+            state.messageParams = {...state.messageParams, ...action.payload, pageNumber: 1}
         },
-        removeMessage: (state, action) => {
-            messagesAdapter.removeOne(state, action.payload);
+        setPageNumber: (state, action) => {
             state.messagesLoaded = false;
-        }
+            state.messageParams = {...state.messageParams, ...action.payload}
+        },
+        setPagination: (state, action) => {
+            state.pagination = action.payload
+        },
+        resetMessageParams: (state) => {
+            state.messageParams = initParams()
+        },
     },
     extraReducers: (builder => {
         builder.addCase(fetchMessagesAsync.pending, (state, action) => {
@@ -113,4 +150,4 @@ export const messagesSlice = createSlice({
 
 export const messageSelectors = messagesAdapter.getSelectors((state: RootState) => state.messages);
 
-export const { setMessage, removeMessage } = messagesSlice.actions;
+export const { setMessageParams, setPageNumber, setPagination, resetMessageParams } = messagesSlice.actions;
