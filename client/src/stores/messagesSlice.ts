@@ -126,7 +126,7 @@ export const messagesSlice = createSlice({
             action.payload.forEach((message) => {
                 message.postedDate = new Date(message.postedDate)!;
             });
-            messagesAdapter.setAll(state, action.payload);
+            messagesAdapter.upsertMany(state, action.payload);
             state.status = 'idle';
             state.messagesLoaded = true;
         });
