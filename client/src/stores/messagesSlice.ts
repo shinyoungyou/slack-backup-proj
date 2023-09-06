@@ -14,36 +14,6 @@ interface MessagesState {
 
 const messagesAdapter = createEntityAdapter<Message>();
 
-// Selectors
-const { selectAll } = messagesAdapter.getSelectors((state: RootState) => state.messages);
-
-// Selector to get messages sorted by date
-export const selectMessagesByDate = createSelector(
-  [selectAll],
-  (messages) => {
-    console.log(messages);    
-    return messages.slice().sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime());
-  }
-);
-
-// Selector to group messages by date
-export const selectGroupedMessages = createSelector(
-  [selectMessagesByDate],
-  (messagesByDate) => {
-    return Object.entries(
-      messagesByDate.reduce((groupedMessages, message) => {
-        
-        const dateKey = format(message.postedDate, 'EEE, MMM dd yyyy');
-        if (!groupedMessages[dateKey]) {
-          groupedMessages[dateKey] = [];
-        }
-        groupedMessages[dateKey].push(message);
-        return groupedMessages;
-      }, {} as { [key: string]: Message[] })
-    );
-  }
-);
-
 function getAxiosParams(messageParams: MessageParams) {
     const params = new URLSearchParams();
     params.append('pageNumber', messageParams.pageNumber.toString());

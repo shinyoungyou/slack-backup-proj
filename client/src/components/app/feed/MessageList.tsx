@@ -4,11 +4,13 @@ import { useAppSelector } from "@/stores/configureStore";
 import MessageListItem from "./MessageListItem";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import DateFilters from "./DateFilters";
-import { selectGroupedMessages } from "@/stores/messagesSlice";
+import { messageSelectors, fetchMessagesAsync } from "@/stores/messagesSlice";
+import { Message } from "@/models/message";
+import { format } from 'date-fns';
 
 export default function MessageList() {
   const { messagesLoaded } = useAppSelector((state) => state.messages);
-  const groupedMessages = useAppSelector(selectGroupedMessages);
+  const messages = useAppSelector(messageSelectors.selectAll);
   const [selectDate, setSelectDate] = useState<string>('');
 
   useEffect(() => {
@@ -32,27 +34,38 @@ export default function MessageList() {
     setSelectDate(date);
   };
 
-  console.log(groupedMessages);
+  const formattedDate = (date: Date) => format(date, 'EEE, MMM dd yyyy');
+
+  const showDateLabel = (prevMessage: Message, message: Message) => {
+    if (prevMessage) {
+      return formattedDate(prevMessage.postedDate) !== formattedDate(message.postedDate);
+    } else {
+      return true;
+    }
+  }
+  
 
   return (
     <>
-      {groupedMessages.map(([group, messages]) => (
-        <div key={group}>
-          {selectDate === group && <div ref={dateRef}></div>}
-          <DateFilters group={group} scrollToSpecificDate={scrollToSpecificDate}  />
           <Grid container spacing={4}>
-              {messages.map((message) => (
+              {messages.map((message, index) => (
                 <Grid key={message.slackId} item xs={12}>
                   {!messagesLoaded ? (
                     <MessageListItemSkeleton />
                   ) : (
-                    <MessageListItem message={message} />
+                    <>
+                      {showDateLabel(messages[index-1], message) && 
+                        <>
+                        {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>}
+                        <DateFilters group={formattedDate(message.postedDate)} scrollToSpecificDate={scrollToSpecificDate}  />
+                        </>
+                      }
+                      <MessageListItem message={message} />
+                    </>
                   )}
                 </Grid>
               ))}
           </Grid>
-        </div>
-      ))}
     </>
   );
 }

@@ -4,6 +4,7 @@ import MessageList from "./MessageList";
 import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
 import InfiniteScroll from "react-infinite-scroller";
 import { setPageNumber } from "@/stores/messagesSlice";
+// import { AutoSizer, InfiniteLoader, List, WindowScroller } from "react-virtualized";
 
 export default function FeedPage() {
   const { messagesLoaded, pagination } = useAppSelector((state) => state.messages);
