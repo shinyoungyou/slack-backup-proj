@@ -5,10 +5,21 @@ import MessageListItem from "./MessageListItem";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import DateFilters from "./DateFilters";
 import { messageSelectors, fetchMessagesAsync } from "@/stores/messagesSlice";
+import {
+  CellMeasurer,
+} from "react-virtualized";
 import { Message } from "@/models/message";
 import { format } from 'date-fns';
 
-export default function MessageList() {
+interface Props {
+  key: string;
+  cache: any;
+  index: number;
+  style: any;
+  parent: any;
+}
+
+export default function MessageList({ key, cache, index, style, parent }: Props) {
   const { messagesLoaded } = useAppSelector((state) => state.messages);
   const messages = useAppSelector(messageSelectors.selectAll);
   const [selectDate, setSelectDate] = useState<string>('');
@@ -43,12 +54,18 @@ export default function MessageList() {
       return true;
     }
   }
-  
+
+  const message = messages[index];
 
   return (
-    <>
-          <Grid container spacing={4}>
-              {messages.map((message, index) => (
+    <CellMeasurer
+      key={key}
+      cache={cache.current}
+      parent={parent}
+      columnIndex={0}
+      rowIndex={index}>
+          {/* <Grid container spacing={4}> */}
+              {/* {messages.map((message, index) => ( */}
                 <Grid key={message.slackId} item xs={12}>
                   {!messagesLoaded ? (
                     <MessageListItemSkeleton />
@@ -64,8 +81,8 @@ export default function MessageList() {
                     </>
                   )}
                 </Grid>
-              ))}
-          </Grid>
-    </>
+              {/* ))} */}
+          {/* </Grid> */}
+    </CellMeasurer>
   );
 }
