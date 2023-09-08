@@ -3,8 +3,9 @@ import { Grid, Paper } from "@mui/material";
 import MessageList from "./MessageList";
 import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
 import { setPageNumber } from "@/stores/messagesSlice";
-import { messageSelectors } from "@/stores/messagesSlice";
+import { messageSelectors, getAxiosParams } from "@/stores/messagesSlice";
 import { AutoSizer, InfiniteLoader, List, WindowScroller, CellMeasurerCache } from "react-virtualized";
+import agent from '@/apis/agent';
 
 export default function FeedPage() {
   const { messagesLoaded, pagination } = useAppSelector((state) => state.messages);
@@ -38,26 +39,24 @@ export default function FeedPage() {
         <WindowScroller>
           {({ isScrolling, onChildScroll, scrollTop }) => (
             <InfiniteLoader
-              isRowLoaded={(index) => {
-                if (messages[index as unknown as number]) {
-                  // console.log(!!messages[index as unknown as number]);
-                  return !!messages[index as unknown as number];
-                  
-                } else {
-                  // console.log(messagesLoaded);
-                  return messagesLoaded;
-                }
+              isRowLoaded={({index}) => { 
+                console.log(!!messages[index]);
+                
+                return !!messages[index];
               }}
-              // isRowLoaded={(index) => messagesLoaded}
-              loadMoreRows={(range: { startIndex: number; stopIndex: number }) => {
-                console.log(range.startIndex);
-                console.log(range.stopIndex);
-                console.log("asdgfhghj");
-                
-                
+              loadMoreRows={async ({ startIndex, stopIndex }) =>  {
+                setLoadingNext(true);
+                dispatch(setPageNumber({ pageNumber: pagination!.currentPage + 1}));
                 return !loadingNext &&
-                !!pagination &&
-                pagination.currentPage < pagination.totalPages && handleGetNext as any}
+                  !!pagination &&
+                  pagination.currentPage < pagination.totalPages && await agent.Messages.list(getAxiosParams({ pageNumber: startIndex/4+1,
+                  pageSize: 4 }))
+                
+                
+                // return !loadingNext &&
+                // !!pagination &&
+                // pagination.currentPage < pagination.totalPages && handleGetNext as any
+              }
               }
               rowCount={pagination?.totalItems || 0} // Set the total number of rows
             >

@@ -14,7 +14,7 @@ interface MessagesState {
 
 const messagesAdapter = createEntityAdapter<Message>();
 
-function getAxiosParams(messageParams: MessageParams) {
+export function getAxiosParams(messageParams: MessageParams) {
     const params = new URLSearchParams();
     params.append('pageNumber', messageParams.pageNumber.toString());
     params.append('pageSize', messageParams.pageSize.toString());

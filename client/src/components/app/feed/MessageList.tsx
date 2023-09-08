@@ -64,7 +64,7 @@ export default function MessageList({ keyProp, cache, index, style, parent }: Pr
       parent={parent}
       columnIndex={0}
       rowIndex={index}>
-          {/* <Grid container spacing={4}> */}
+          <Grid container rowSpacing={4} style={style}>
               {/* {messages.map((message, index) => ( */}
                 <Grid key={message.slackId} item xs={12}>
                   {!messagesLoaded ? (
@@ -82,7 +82,7 @@ export default function MessageList({ keyProp, cache, index, style, parent }: Pr
                   )}
                 </Grid>
               {/* ))} */}
-          {/* </Grid> */}
+          </Grid>
     </CellMeasurer>
   );
 }
