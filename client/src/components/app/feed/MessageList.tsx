@@ -12,14 +12,14 @@ import { Message } from "@/models/message";
 import { format } from 'date-fns';
 
 interface Props {
-  key: string;
+  keyProp: string;
   cache: any;
   index: number;
   style: any;
   parent: any;
 }
 
-export default function MessageList({ key, cache, index, style, parent }: Props) {
+export default function MessageList({ keyProp, cache, index, style, parent }: Props) {
   const { messagesLoaded } = useAppSelector((state) => state.messages);
   const messages = useAppSelector(messageSelectors.selectAll);
   const [selectDate, setSelectDate] = useState<string>('');
@@ -59,7 +59,7 @@ export default function MessageList({ key, cache, index, style, parent }: Props)
 
   return (
     <CellMeasurer
-      key={key}
+      key={keyProp}
       cache={cache.current}
       parent={parent}
       columnIndex={0}

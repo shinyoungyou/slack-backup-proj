@@ -21,7 +21,7 @@ export default function FeedPage() {
 
   const  handleGetNext = async () => {
     setLoadingNext(true);
-    await dispatch(setPageNumber({ pageNumber: pagination!.currentPage + 1}));
+    dispatch(setPageNumber({ pageNumber: pagination!.currentPage + 1}));
     return;
   }
 
@@ -38,11 +38,27 @@ export default function FeedPage() {
         <WindowScroller>
           {({ isScrolling, onChildScroll, scrollTop }) => (
             <InfiniteLoader
-              // isRowLoaded={(index) => !!messages[index as unknown as number]}
-              isRowLoaded={(index) => messagesLoaded}
-              loadMoreRows={() => !loadingNext &&
+              isRowLoaded={(index) => {
+                if (messages[index as unknown as number]) {
+                  // console.log(!!messages[index as unknown as number]);
+                  return !!messages[index as unknown as number];
+                  
+                } else {
+                  // console.log(messagesLoaded);
+                  return messagesLoaded;
+                }
+              }}
+              // isRowLoaded={(index) => messagesLoaded}
+              loadMoreRows={(range: { startIndex: number; stopIndex: number }) => {
+                console.log(range.startIndex);
+                console.log(range.stopIndex);
+                console.log("asdgfhghj");
+                
+                
+                return !loadingNext &&
                 !!pagination &&
                 pagination.currentPage < pagination.totalPages && handleGetNext as any}
+              }
               rowCount={pagination?.totalItems || 0} // Set the total number of rows
             >
               {({ onRowsRendered, registerChild }) => (
@@ -58,7 +74,7 @@ export default function FeedPage() {
                   rowHeight={cache.current.rowHeight}
                   deferredMeasurementCache={cache.current}
                   rowRenderer={({ key, index, style, parent}) => (
-                      <MessageList key={key} cache={cache} index={index} style={style} parent={parent} />
+                      <MessageList key={key} keyProp={key} cache={cache} index={index} style={style} parent={parent} />
                   )} // Use your custom row rendering function
                   onRowsRendered={onRowsRendered}
                   ref={registerChild}
