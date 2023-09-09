@@ -17,12 +17,13 @@ interface Props {
   index: number;
   style: any;
   parent: any;
+  selectDate: string;
+  setSelectDate: any;
 }
 
-export default function MessageList({ keyProp, cache, index, style, parent }: Props) {
+export default function MessageList({ keyProp, cache, index, style, parent, selectDate, setSelectDate }: Props) {
   const { messagesLoaded } = useAppSelector((state) => state.messages);
   const messages = useAppSelector(messageSelectors.selectAll);
-  const [selectDate, setSelectDate] = useState<string>('');
 
   useEffect(() => {
     if (dateRef.current) {
@@ -37,7 +38,7 @@ export default function MessageList({ keyProp, cache, index, style, parent }: Pr
     setSelectDate('');
   }, [selectDate])
 
-  const dateRef =useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
 
   const scrollToSpecificDate = (date: string) => {
     console.log(date);
@@ -73,6 +74,7 @@ export default function MessageList({ keyProp, cache, index, style, parent }: Pr
                     <>
                       {showDateLabel(messages[index-1], message) && 
                         <>
+                        {/* {selectDate === formattedDate(message.postedDate) ? <div ref={dateRef}></div> : getSelectedDate()} */}
                         {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>}
                         <DateFilters group={formattedDate(message.postedDate)} scrollToSpecificDate={scrollToSpecificDate}  />
                         </>
