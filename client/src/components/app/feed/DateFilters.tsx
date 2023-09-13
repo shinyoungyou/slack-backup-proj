@@ -10,9 +10,10 @@ import { format, addDays } from "date-fns";
 interface Props {
   group: string;
   scrollToSpecificDate: (date: string) => void;
+  setDateExists: any;
 }
 
-export default function DateFilters({ group, scrollToSpecificDate }: Props) {
+export default function DateFilters({ group, scrollToSpecificDate, setDateExists }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [viewCalendar, setViewCalendar] = useState<boolean>(false);
 
@@ -35,6 +36,7 @@ export default function DateFilters({ group, scrollToSpecificDate }: Props) {
   const groupWithoutYear = group.slice(0, -5);
 
   const handleDateClick = (date: string) => {
+    setDateExists([]);
     if (date === 'today') {
       scrollToSpecificDate(todayFormatted); 
     } else if (date === 'yesterday') {

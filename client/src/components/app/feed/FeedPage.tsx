@@ -2,9 +2,11 @@ import { useEffect, useState, useRef } from 'react';
 import { Grid, Paper } from "@mui/material";
 import MessageList from "./MessageList";
 import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
-import { setPageNumber } from "@/stores/messagesSlice";
+import { setPageNumber, setMessageParams } from "@/stores/messagesSlice";
 import { messageSelectors } from "@/stores/messagesSlice";
 import { AutoSizer, InfiniteLoader, List, WindowScroller, CellMeasurerCache } from "react-virtualized";
+import { format, parse } from 'date-fns';
+import { log } from 'console';
 
 export default function FeedPage() {
   const { messagesLoaded, pagination } = useAppSelector((state) => state.messages);
@@ -12,7 +14,53 @@ export default function FeedPage() {
   const messages = useAppSelector(messageSelectors.selectAll);
   const dispatch = useAppDispatch();
   const [selectDate, setSelectDate] = useState<string>('');
+  const [theSelectedDate, setTheSelectedDate] = useState<string>('');
+  const [prevSelectedDate, setPrevSelectedDate] = useState<string>('');
   const [prevScrollTop, setPrevScrollTop] = useState(0);
+  // const [loadSelectedDate, setLoadSelectedDate] = useState(false);
+  const [dateExists, setDateExists] = useState<boolean[]>([]);
+  const [dateExistsInMessages, setDateExistsInMessages] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (messagesLoaded) {
+      setLoadingNext(false);
+    }
+  }, [messagesLoaded]);  
+
+  useEffect(() => {
+    if (theSelectedDate !== '' && prevSelectedDate !== theSelectedDate) {
+      setDateExistsInMessages(dateExists.some((bool) => bool));
+    }
+  }, [dateExists, theSelectedDate, prevSelectedDate]);  
+
+  useEffect(() => {
+    console.log("dateExistsInMessages: "+dateExistsInMessages);
+  }, [dateExistsInMessages]);  
+
+  useEffect(() => {        
+    if (theSelectedDate !== '' && !dateExistsInMessages) {  
+      console.log("-----------loadSelectedDate--------");
+      console.log("dateExistsInMessages: "+dateExistsInMessages);
+      console.log("loadSelectedDate: "+!dateExistsInMessages);
+      console.log("theSelectedDate: "+theSelectedDate);
+      const original = parse(theSelectedDate, 'EEE, MMM dd yyyy', new Date());
+      console.log("original: "+original.toISOString());
+      console.log("-----------loadSelectedDate--------");
+      // setMessageParams({ selectedDate: original.toISOString() });
+    }
+  }, [theSelectedDate, dateExistsInMessages]); 
+
+  useEffect(() => {   
+    console.log("selectDate: "+selectDate);
+    if (selectDate !== '') {
+      setTheSelectedDate(selectDate);
+    }
+  }, [selectDate]); 
+
+  useEffect(() => {   
+    setPrevSelectedDate(theSelectedDate);
+  }, [theSelectedDate]); 
+
 
   const cache = useRef(
     new CellMeasurerCache({
@@ -25,17 +73,10 @@ export default function FeedPage() {
     setLoadingNext(true);
     dispatch(setPageNumber({ pageNumber: pagination!.currentPage + 1}));
     return Promise<any>;
-  }
-
-  useEffect(() => {
-    if (messagesLoaded) {
-      setLoadingNext(false);
-    }
-  }, [messagesLoaded]);  
+  }  
 
   return (
     <div style={{ width: "100%", height: "100vh" }}>
-       {loadingNext && <span>loading more repositories..</span>}
     <AutoSizer>
       {({ height, width }) => (
         <WindowScroller>
@@ -54,7 +95,6 @@ export default function FeedPage() {
               rowCount={pagination?.totalItems || 0} 
             >
               {({ onRowsRendered, registerChild }) => (
-                
                 <List
                   autoHeight
                   height={height}
@@ -66,12 +106,11 @@ export default function FeedPage() {
                   rowHeight={cache.current.rowHeight}
                   deferredMeasurementCache={cache.current}
                   rowRenderer={({ key, index, style, parent}) => (
-                      <MessageList key={key} keyProp={key} cache={cache} index={index} style={style} parent={parent} selectDate={selectDate} setSelectDate={setSelectDate}/>
+                      <MessageList key={key} keyProp={key} cache={cache} index={index} style={style} parent={parent} selectDate={selectDate} setSelectDate={setSelectDate} dateExists={dateExists} setDateExists={setDateExists}/>
                   )} 
                   onRowsRendered={onRowsRendered}
                   ref={registerChild}
                 />
-               
               )}
             </InfiniteLoader>
           )}

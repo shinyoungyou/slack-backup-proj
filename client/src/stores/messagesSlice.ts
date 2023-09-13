@@ -18,6 +18,11 @@ export function getAxiosParams(messageParams: MessageParams) {
     const params = new URLSearchParams();
     params.append('pageNumber', messageParams.pageNumber.toString());
     params.append('pageSize', messageParams.pageSize.toString());
+    if (messageParams.selectedDate) {
+        params.append('selectedDate', messageParams.selectedDate.toString());
+    } else {
+        
+    }
     // if (messageParams.searchTerm) params.append('searchTerm', messageParams.searchTerm);
     return params;
 }

@@ -4,7 +4,7 @@ import { useAppSelector } from "@/stores/configureStore";
 import MessageListItem from "./MessageListItem";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import DateFilters from "./DateFilters";
-import { messageSelectors, fetchMessagesAsync } from "@/stores/messagesSlice";
+import { messageSelectors } from "@/stores/messagesSlice";
 import {
   CellMeasurer,
 } from "react-virtualized";
@@ -19,9 +19,11 @@ interface Props {
   parent: any;
   selectDate: string;
   setSelectDate: any;
+  dateExists: boolean[]; 
+  setDateExists: any;
 }
 
-export default function MessageList({ keyProp, cache, index, style, parent, selectDate, setSelectDate }: Props) {
+export default function MessageList({ keyProp, cache, index, style, parent, selectDate, setSelectDate, dateExists, setDateExists }: Props) {
   const { messagesLoaded } = useAppSelector((state) => state.messages);
   const messages = useAppSelector(messageSelectors.selectAll);
 
@@ -36,12 +38,12 @@ export default function MessageList({ keyProp, cache, index, style, parent, sele
     }
 
     setSelectDate('');
-  }, [selectDate])
+  }, [selectDate, setSelectDate])
 
   const dateRef = useRef<HTMLDivElement>(null);
 
   const scrollToSpecificDate = (date: string) => {
-    console.log(date);
+    // console.log(date);
     
     setSelectDate(date);
   };
@@ -57,6 +59,14 @@ export default function MessageList({ keyProp, cache, index, style, parent, sele
   }
 
   const message = messages[index];
+
+  useEffect(() => {
+    if (selectDate !== '' && messages.length > 0) {
+      setDateExists((prev: boolean[]) => { 
+        return [...prev, selectDate === formattedDate(message.postedDate)]
+      });
+    }
+  }, [selectDate, messages.length])
 
   return (
     <CellMeasurer
@@ -74,9 +84,9 @@ export default function MessageList({ keyProp, cache, index, style, parent, sele
                     <>
                       {showDateLabel(messages[index-1], message) && 
                         <>
-                        {/* {selectDate === formattedDate(message.postedDate) ? <div ref={dateRef}></div> : getSelectedDate()} */}
                         {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>}
-                        <DateFilters group={formattedDate(message.postedDate)} scrollToSpecificDate={scrollToSpecificDate}  />
+                        {/* {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>} */}
+                        <DateFilters group={formattedDate(message.postedDate)} scrollToSpecificDate={scrollToSpecificDate} setDateExists={setDateExists} />
                         </>
                       }
                       <MessageListItem message={message} />

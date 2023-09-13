@@ -18,4 +18,5 @@ export class PaginatedResult<T> {
 export interface MessageParams {
   pageNumber: number;
   pageSize: number;
+  selectedDate?: string;
 }
