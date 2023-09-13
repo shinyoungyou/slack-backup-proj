@@ -32,7 +32,7 @@ export const fetchMessagesAsync = createAsyncThunk<Message[], void, {state: Root
     async (_, thunkAPI) => {
         const params = getAxiosParams(thunkAPI.getState().messages.messageParams)
         try {
-            const response = await agent.Messages.list(params);            
+            const response = await agent.Messages.list(params)            
             thunkAPI.dispatch(setPagination(response.pagination));
             return response.data;
         } catch (error: any) {
@@ -77,8 +77,13 @@ export const messagesSlice = createSlice({
         //     messagesAdapter.removeOne(state, action.payload);
         //     state.messagesLoaded = false;
         // },
+
         setMessageParams: (state, action) => {
-            state.messagesLoaded = false;
+            console.log(action.payload);
+            
+            if (action.payload.selectedDate !== '') {
+                state.messagesLoaded = false;    
+            }
             state.messageParams = {...state.messageParams, ...action.payload, pageNumber: 1}
         },
         setPageNumber: (state, action) => {
@@ -104,6 +109,7 @@ export const messagesSlice = createSlice({
             messagesAdapter.upsertMany(state, action.payload);
             state.status = 'idle';
             state.messagesLoaded = true;
+            state.messageParams.selectedDate = '';
         });
         builder.addCase(fetchMessagesAsync.rejected, (state, action) => {
             console.log(action.payload);

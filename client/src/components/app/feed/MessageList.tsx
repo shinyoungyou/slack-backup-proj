@@ -21,11 +21,15 @@ interface Props {
   setSelectDate: any;
   dateExists: boolean[]; 
   setDateExists: any;
+  theSelectedDate: string;
 }
 
-export default function MessageList({ keyProp, cache, index, style, parent, selectDate, setSelectDate, dateExists, setDateExists }: Props) {
+export default function MessageList({ theSelectedDate, keyProp, cache, index, style, parent, selectDate, setSelectDate, dateExists, setDateExists }: Props) {
   const { messagesLoaded } = useAppSelector((state) => state.messages);
   const messages = useAppSelector(messageSelectors.selectAll);
+  const [idk, setIdk] = useState<boolean>(false);
+  const dateRef = useRef<HTMLDivElement>(null);
+  
 
   useEffect(() => {
     if (dateRef.current) {
@@ -38,13 +42,13 @@ export default function MessageList({ keyProp, cache, index, style, parent, sele
     }
 
     setSelectDate('');
-  }, [selectDate, setSelectDate])
+  }, [idk])
 
-  const dateRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    setIdk(theSelectedDate === formattedDate(message.postedDate));
+  }, [theSelectedDate])
 
   const scrollToSpecificDate = (date: string) => {
-    // console.log(date);
-    
     setSelectDate(date);
   };
 
@@ -84,7 +88,7 @@ export default function MessageList({ keyProp, cache, index, style, parent, sele
                     <>
                       {showDateLabel(messages[index-1], message) && 
                         <>
-                        {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>}
+                        {idk && <div ref={dateRef}></div>}
                         {/* {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>} */}
                         <DateFilters group={formattedDate(message.postedDate)} scrollToSpecificDate={scrollToSpecificDate} setDateExists={setDateExists} />
                         </>

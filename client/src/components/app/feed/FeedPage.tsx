@@ -15,40 +15,34 @@ export default function FeedPage() {
   const dispatch = useAppDispatch();
   const [selectDate, setSelectDate] = useState<string>('');
   const [theSelectedDate, setTheSelectedDate] = useState<string>('');
-  const [prevSelectedDate, setPrevSelectedDate] = useState<string>('');
   const [prevScrollTop, setPrevScrollTop] = useState(0);
-  // const [loadSelectedDate, setLoadSelectedDate] = useState(false);
   const [dateExists, setDateExists] = useState<boolean[]>([]);
   const [dateExistsInMessages, setDateExistsInMessages] = useState<boolean>(true);
 
   useEffect(() => {
     if (messagesLoaded) {
       setLoadingNext(false);
+      // dispatch(setMessageParams({ selectDate: '' }));
     }
   }, [messagesLoaded]);  
 
   useEffect(() => {
-    if (theSelectedDate !== '' && prevSelectedDate !== theSelectedDate) {
+    if (theSelectedDate !== '') {
       setDateExistsInMessages(dateExists.some((bool) => bool));
     }
-  }, [dateExists, theSelectedDate, prevSelectedDate]);  
-
-  useEffect(() => {
-    console.log("dateExistsInMessages: "+dateExistsInMessages);
-  }, [dateExistsInMessages]);  
+  }, [dateExists, theSelectedDate]);   
 
   useEffect(() => {        
     if (theSelectedDate !== '' && !dateExistsInMessages) {  
       console.log("-----------loadSelectedDate--------");
-      console.log("dateExistsInMessages: "+dateExistsInMessages);
       console.log("loadSelectedDate: "+!dateExistsInMessages);
       console.log("theSelectedDate: "+theSelectedDate);
       const original = parse(theSelectedDate, 'EEE, MMM dd yyyy', new Date());
       console.log("original: "+original.toISOString());
       console.log("-----------loadSelectedDate--------");
-      // setMessageParams({ selectedDate: original.toISOString() });
+      dispatch(setMessageParams({ selectedDate: original.toISOString() }));
     }
-  }, [theSelectedDate, dateExistsInMessages]); 
+  }, [dateExistsInMessages]); 
 
   useEffect(() => {   
     console.log("selectDate: "+selectDate);
@@ -56,11 +50,6 @@ export default function FeedPage() {
       setTheSelectedDate(selectDate);
     }
   }, [selectDate]); 
-
-  useEffect(() => {   
-    setPrevSelectedDate(theSelectedDate);
-  }, [theSelectedDate]); 
-
 
   const cache = useRef(
     new CellMeasurerCache({
@@ -88,7 +77,9 @@ export default function FeedPage() {
                   setPrevScrollTop(scrollTop);
                 };                
                 
-                return isScrollDown && messagesLoaded && !loadingNext && isScrolling && !!pagination &&
+                return isScrollDown && messagesLoaded 
+                && !loadingNext 
+                && isScrolling && !!pagination &&
                 pagination.currentPage < pagination.totalPages && !!messages[index];
               }}
               loadMoreRows={handleGetNext as any}
@@ -106,7 +97,7 @@ export default function FeedPage() {
                   rowHeight={cache.current.rowHeight}
                   deferredMeasurementCache={cache.current}
                   rowRenderer={({ key, index, style, parent}) => (
-                      <MessageList key={key} keyProp={key} cache={cache} index={index} style={style} parent={parent} selectDate={selectDate} setSelectDate={setSelectDate} dateExists={dateExists} setDateExists={setDateExists}/>
+                      <MessageList key={key} keyProp={key} cache={cache} index={index} style={style} parent={parent} selectDate={selectDate} setSelectDate={setSelectDate} dateExists={dateExists} setDateExists={setDateExists} theSelectedDate={theSelectedDate}/>
                   )} 
                   onRowsRendered={onRowsRendered}
                   ref={registerChild}
