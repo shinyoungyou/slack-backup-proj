@@ -6,7 +6,6 @@ import { setPageNumber, setMessageParams } from "@/stores/messagesSlice";
 import { messageSelectors } from "@/stores/messagesSlice";
 import { AutoSizer, InfiniteLoader, List, WindowScroller, CellMeasurerCache } from "react-virtualized";
 import { format, parse } from 'date-fns';
-import { log } from 'console';
 
 export default function FeedPage() {
   const { messagesLoaded, pagination } = useAppSelector((state) => state.messages);
@@ -22,7 +21,7 @@ export default function FeedPage() {
   useEffect(() => {
     if (messagesLoaded) {
       setLoadingNext(false);
-      // dispatch(setMessageParams({ selectDate: '' }));
+      dispatch(setMessageParams({ selectedDate: '' }));
     }
   }, [messagesLoaded]);  
 
@@ -57,12 +56,12 @@ export default function FeedPage() {
       defaultHeight: 150,
     })
   );
-
+  
   const handleGetNext = async () => {
     setLoadingNext(true);
     dispatch(setPageNumber({ pageNumber: pagination!.currentPage + 1}));
     return Promise<any>;
-  }  
+  }
 
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -75,8 +74,18 @@ export default function FeedPage() {
                 let isScrollDown = prevScrollTop < scrollTop;
                 if (prevScrollTop !== scrollTop) {
                   setPrevScrollTop(scrollTop);
-                };                
+                };     
                 
+                // if (isScrollDown && pagination) {
+                //   messagesLoaded && pagination.currentPage < pagination.totalPages && dispatch(setPageNumber({ pageNumber: pagination!.currentPage + 1}));
+                // }
+
+                // console.log("isScrollDown: "+isScrollDown);
+                // console.log("messagesLoaded: "+messagesLoaded);
+                // console.log("loadingNext: "+loadingNext);
+                // console.log("isScrolling: "+isScrolling);    
+                // console.log("Overall: "+isScrollDown && messagesLoaded && !loadingNext && isScrolling && !!pagination && pagination.currentPage < pagination.totalPages && !!messages[index]);
+                            
                 return isScrollDown && messagesLoaded 
                 && !loadingNext 
                 && isScrolling && !!pagination &&

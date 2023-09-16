@@ -22,8 +22,6 @@ exports.getMessages = async (req, res) => {
         $gte: startDate,
         $lte: endDate,
       };
-      console.log("filter.postedDate: "+filter.postedDate);
-
 
     const totalItems = await Message.countDocuments();
     const totalPages = Math.ceil(totalItems / limit);

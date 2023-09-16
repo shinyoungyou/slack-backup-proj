@@ -6,7 +6,8 @@ import { format } from 'date-fns';
 import { MessageParams, Pagination } from '@/models/pagination';
 
 interface MessagesState {
-    messagesLoaded: boolean;
+    messagesLoadTrigger: boolean;
+    messagesLoaded: boolean; // true: load DONE, false: load ING
     status: string;
     messageParams: MessageParams;
     pagination: Pagination | null;
@@ -63,6 +64,7 @@ function initParams(): MessageParams {
 export const messagesSlice = createSlice({
     name: 'messages',
     initialState: messagesAdapter.getInitialState<MessagesState>({
+        messagesLoadTrigger: false,
         messagesLoaded: false,
         status: 'idle',
         messageParams: initParams(),
@@ -77,17 +79,19 @@ export const messagesSlice = createSlice({
         //     messagesAdapter.removeOne(state, action.payload);
         //     state.messagesLoaded = false;
         // },
-
+        setMessagesLoadTrigger: (state, action) => {
+            state.messagesLoadTrigger = true;
+        },
         setMessageParams: (state, action) => {
-            console.log(action.payload);
-            
             if (action.payload.selectedDate !== '') {
-                state.messagesLoaded = false;    
+                state.messagesLoadTrigger = true;    
+                state.messageParams = {...state.messageParams, ...action.payload, pageNumber: 1 }
+            } else {
+                state.messageParams = {...state.messageParams, ...action.payload }
             }
-            state.messageParams = {...state.messageParams, ...action.payload, pageNumber: 1}
         },
         setPageNumber: (state, action) => {
-            state.messagesLoaded = false;
+            state.messagesLoadTrigger = true;
             state.messageParams = {...state.messageParams, ...action.payload}
         },
         setPagination: (state, action) => {
@@ -99,6 +103,8 @@ export const messagesSlice = createSlice({
     },
     extraReducers: (builder => {
         builder.addCase(fetchMessagesAsync.pending, (state, action) => {
+            state.messagesLoaded = false; 
+            state.messagesLoadTrigger = false;
             state.status = 'pendingFetchMessages'
         });
         builder.addCase(fetchMessagesAsync.fulfilled, (state, action) => {
@@ -108,6 +114,7 @@ export const messagesSlice = createSlice({
             });
             messagesAdapter.upsertMany(state, action.payload);
             state.status = 'idle';
+            // state.messagesLoadTrigger = false;
             state.messagesLoaded = true;
             state.messageParams.selectedDate = '';
         });
@@ -131,4 +138,4 @@ export const messagesSlice = createSlice({
 
 export const messageSelectors = messagesAdapter.getSelectors((state: RootState) => state.messages);
 
-export const { setMessageParams, setPageNumber, setPagination, resetMessageParams } = messagesSlice.actions;
+export const { setMessagesLoadTrigger, setMessageParams, setPageNumber, setPagination, resetMessageParams } = messagesSlice.actions;
