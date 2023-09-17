@@ -4,7 +4,7 @@ import { useAppSelector } from "@/stores/configureStore";
 import MessageListItem from "./MessageListItem";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import DateFilters from "./DateFilters";
-import { messageSelectors, fetchMessagesAsync } from "@/stores/messagesSlice";
+import { messageSelectors, fetchMessagesAsync, selectMessagesByDate } from "@/stores/messagesSlice";
 import { Message } from "@/models/message";
 import { format } from 'date-fns';
 
@@ -12,6 +12,7 @@ export default function MessageList() {
   const { messagesLoaded } = useAppSelector((state) => state.messages);
   const messages = useAppSelector(messageSelectors.selectAll);
   const [selectDate, setSelectDate] = useState<string>('');
+  const messagesByDate = useAppSelector(selectMessagesByDate);
 
   useEffect(() => {
     if (dateRef.current) {
@@ -50,9 +51,11 @@ export default function MessageList() {
           <Grid container spacing={4}>
               {messages.map((message, index) => (
                 <Grid key={message.slackId} item xs={12}>
-                  {!messagesLoaded ? (
-                    <MessageListItemSkeleton />
-                  ) : (
+                  {
+                  // !messagesLoaded ? (
+                  //   <MessageListItemSkeleton />
+                  // ) : 
+                  (
                     <>
                       {showDateLabel(messages[index-1], message) && 
                         <>

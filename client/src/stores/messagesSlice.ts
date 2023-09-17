@@ -14,6 +14,18 @@ interface MessagesState {
 
 const messagesAdapter = createEntityAdapter<Message>();
 
+const { selectAll } = messagesAdapter.getSelectors((state: RootState) => state.messages);
+
+// Selector to get messages sorted by date
+export const selectMessagesByDate = createSelector(
+  [selectAll],
+  (messages) => {
+    console.log(messages);
+    
+    return messages.slice().sort((a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+  }
+);
+
 function getAxiosParams(messageParams: MessageParams) {
     const params = new URLSearchParams();
     params.append('pageNumber', messageParams.pageNumber.toString());
@@ -51,7 +63,7 @@ export const fetchMessageAsync = createAsyncThunk<Message, string>(
 function initParams(): MessageParams {
     return {
         pageNumber: 1,
-        pageSize: 4,
+        pageSize: 6,
     }
 }
 
@@ -97,8 +109,16 @@ export const messagesSlice = createSlice({
                 message.postedDate = new Date(message.postedDate)!;
             });
             messagesAdapter.upsertMany(state, action.payload);
+
+            if (state.ids.length > 6) {
+              const messagesToRemove = state.ids.slice(0, 3); // Get the oldest 4 messages
+              messagesToRemove.forEach((messageId) => {
+                messagesAdapter.removeOne(state, messageId);
+              });
+            }
             state.status = 'idle';
             state.messagesLoaded = true;
+         
         });
         builder.addCase(fetchMessagesAsync.rejected, (state, action) => {
             console.log(action.payload);

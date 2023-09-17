@@ -7,7 +7,7 @@ exports.getMessages = async (req, res) => {
   try {
     const { pageNumber, pageSize } = req.query;
     const page = parseInt(pageNumber) || 1;
-    const limit = parseInt(pageSize) || 4; // You can set your desired default page size here
+    const limit = parseInt(pageSize) || 6; // You can set your desired default page size here
     const totalItems = await Message.countDocuments();
     const skip = (page - 1) * limit;
 
