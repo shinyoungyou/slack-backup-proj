@@ -1,20 +1,28 @@
 import { useState, useRef, useEffect } from "react";
 import { Grid } from "@mui/material";
-import { useAppSelector } from "@/stores/configureStore";
+import { useAppSelector, useAppDispatch } from "@/stores/configureStore";
 import MessageListItem from "./MessageListItem";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import DateFilters from "./DateFilters";
-import { messageSelectors, fetchMessagesAsync, selectMessagesByDate } from "@/stores/messagesSlice";
+import { messageSelectors, fetchMessagesAsync, selectMessagesByDate, setMessageParams } from "@/stores/messagesSlice";
 import { Message } from "@/models/message";
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 
 export default function MessageList() {
-  const { messagesLoaded } = useAppSelector((state) => state.messages);
+  const { messagesLoaded, messageParams } = useAppSelector((state) => state.messages);
   const messages = useAppSelector(messageSelectors.selectAll);
   const [selectDate, setSelectDate] = useState<string>('');
   const messagesByDate = useAppSelector(selectMessagesByDate);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
+    if (messagesLoaded && messageParams.selectedDate) {      
+      setSelectDate(formattedDate(new Date(messageParams.selectedDate)));
+    }
+  }, [messagesLoaded, messageParams]);
+
+  useEffect(() => {
+    if (selectDate === '') return;
     if (dateRef.current) {
       const yOffset = dateRef.current?.getBoundingClientRect().top + window.scrollY;
 
@@ -22,12 +30,15 @@ export default function MessageList() {
         behavior: "smooth",
         top: yOffset,
       });
+    } else {
+      let original = parse(selectDate, 'EEE, MMM dd yyyy', new Date());
+      dispatch(setMessageParams({ selectedDate: original.toISOString() }));
     }
 
     setSelectDate('');
-  }, [selectDate])
+  }, [dispatch, selectDate])
 
-  const dateRef =useRef<HTMLDivElement>(null);
+  const dateRef = useRef<HTMLDivElement>(null);
 
   const scrollToSpecificDate = (date: string) => {
     console.log(date);

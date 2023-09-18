@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Grid, Paper } from "@mui/material";
 import MessageList from "./MessageList";
 import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
-import { setPageNumber, messageSelectors } from "@/stores/messagesSlice";
+import { setPageNumber, setMessageParams } from "@/stores/messagesSlice";
 // import { AutoSizer, InfiniteLoader, List, WindowScroller } from "react-virtualized";
 
 export default function FeedPage() {
@@ -11,11 +11,11 @@ export default function FeedPage() {
   const dispatch = useAppDispatch();
   const nextRef = useRef<HTMLDivElement>(null);
 
-  const messages = useAppSelector(messageSelectors.selectAll);
 
   useEffect(() => {
     if (messagesLoaded) {      
-      setLoadingNext(false)
+      setLoadingNext(false);
+      dispatch(setMessageParams({ selectedDate: '' }));
     }
   }, [messagesLoaded]);
 

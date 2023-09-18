@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { MessageParams, Pagination } from '@/models/pagination';
 
 interface MessagesState {
-    messagesLoaded: boolean;
+    messagesLoaded: boolean; // messages load trigger
     status: string;
     messageParams: MessageParams;
     pagination: Pagination | null;
@@ -22,7 +22,7 @@ export const selectMessagesByDate = createSelector(
   (messages) => {
     console.log(messages);
     
-    return messages.slice().sort((a, b) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime());
+    return messages.slice().sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime());
   }
 );
 
@@ -31,6 +31,9 @@ function getAxiosParams(messageParams: MessageParams) {
     params.append('pageNumber', messageParams.pageNumber.toString());
     params.append('pageSize', messageParams.pageSize.toString());
     // if (messageParams.searchTerm) params.append('searchTerm', messageParams.searchTerm);
+    if (messageParams.selectedDate) {
+        params.append('selectedDate', messageParams.selectedDate.toString());
+    }
     return params;
 }
 
@@ -64,6 +67,7 @@ function initParams(): MessageParams {
     return {
         pageNumber: 1,
         pageSize: 6,
+        selectedDate: ''
     }
 }
 
@@ -85,8 +89,12 @@ export const messagesSlice = createSlice({
         //     state.messagesLoaded = false;
         // },
         setMessageParams: (state, action) => {
-            state.messagesLoaded = false;
-            state.messageParams = {...state.messageParams, ...action.payload, pageNumber: 1}
+            if (action.payload.selectedDate !== '') {
+                state.messagesLoaded = false;    
+                state.messageParams = {...state.messageParams, ...action.payload, pageNumber: 1 }
+            } else {
+                state.messageParams = {...state.messageParams, ...action.payload }
+            }
         },
         setPageNumber: (state, action) => {
             state.messagesLoaded = false;
@@ -108,7 +116,13 @@ export const messagesSlice = createSlice({
             action.payload.forEach((message) => {
                 message.postedDate = new Date(message.postedDate)!;
             });
-            messagesAdapter.upsertMany(state, action.payload);
+            console.log(state.messageParams.selectedDate);
+            
+            if (state.messageParams.selectedDate) {
+                messagesAdapter.setAll(state, action.payload.reverse());
+            } else {
+                messagesAdapter.upsertMany(state, action.payload);
+            }
 
             if (state.ids.length > 6) {
               const messagesToRemove = state.ids.slice(0, 3); // Get the oldest 4 messages
