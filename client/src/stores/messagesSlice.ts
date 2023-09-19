@@ -1,15 +1,15 @@
 import { createSelector, createAsyncThunk, createEntityAdapter, createSlice, legacy_createStore } from "@reduxjs/toolkit";
 import agent from "@/apis/agent";
-import { Message } from "@/models/message";
+import { Message, MessageParams } from "@/models/message";
 import { RootState } from "@/stores/configureStore";
 import { format } from 'date-fns';
-import { MessageParams, Pagination } from '@/models/pagination';
 
 interface MessagesState {
-    messagesLoaded: boolean; // messages load trigger
+    bringMorePosts: boolean;
+    messagesLoaded: boolean;  // messages load trigger
+    messageLength: number;
     status: string;
     messageParams: MessageParams;
-    pagination: Pagination | null;
 }
 
 const messagesAdapter = createEntityAdapter<Message>();
@@ -20,19 +20,18 @@ const { selectAll } = messagesAdapter.getSelectors((state: RootState) => state.m
 export const selectMessagesByDate = createSelector(
   [selectAll],
   (messages) => {
-    console.log(messages);
-    
     return messages.slice().sort((a, b) => b.postedDate.getTime() - a.postedDate.getTime());
   }
 );
 
 function getAxiosParams(messageParams: MessageParams) {
     const params = new URLSearchParams();
-    params.append('pageNumber', messageParams.pageNumber.toString());
-    params.append('pageSize', messageParams.pageSize.toString());
     // if (messageParams.searchTerm) params.append('searchTerm', messageParams.searchTerm);
     if (messageParams.selectedDate) {
         params.append('selectedDate', messageParams.selectedDate.toString());
+    } 
+    if (messageParams.lastId !== '')  {
+        params.append('lastId', messageParams.lastId.toString());
     }
     return params;
 }
@@ -42,9 +41,8 @@ export const fetchMessagesAsync = createAsyncThunk<Message[], void, {state: Root
     async (_, thunkAPI) => {
         const params = getAxiosParams(thunkAPI.getState().messages.messageParams)
         try {
-            const response = await agent.Messages.list(params);            
-            thunkAPI.dispatch(setPagination(response.pagination));
-            return response.data;
+            return await agent.Messages.list(params);            
+            // return response.data;
         } catch (error: any) {
             return thunkAPI.rejectWithValue({error: error.data})
         }
@@ -65,8 +63,7 @@ export const fetchMessageAsync = createAsyncThunk<Message, string>(
 
 function initParams(): MessageParams {
     return {
-        pageNumber: 1,
-        pageSize: 6,
+        lastId: '',
         selectedDate: ''
     }
 }
@@ -74,10 +71,11 @@ function initParams(): MessageParams {
 export const messagesSlice = createSlice({
     name: 'messages',
     initialState: messagesAdapter.getInitialState<MessagesState>({
+        bringMorePosts: true,
         messagesLoaded: false,
+        messageLength: 0,
         status: 'idle',
         messageParams: initParams(),
-        pagination: null
     }),
     reducers: {
         // setMessage: (state, action) => {
@@ -88,20 +86,18 @@ export const messagesSlice = createSlice({
         //     messagesAdapter.removeOne(state, action.payload);
         //     state.messagesLoaded = false;
         // },
-        setMessageParams: (state, action) => {
-            if (action.payload.selectedDate !== '') {
+        setSelectedDate: (state, action) => {
+            if (action.payload !== '') {
                 state.messagesLoaded = false;    
-                state.messageParams = {...state.messageParams, ...action.payload, pageNumber: 1 }
+                state.messageParams.selectedDate = action.payload;
+                // state.messageParams.lastId = 1;
             } else {
-                state.messageParams = {...state.messageParams, ...action.payload }
+                state.messageParams.selectedDate = action.payload;
             }
         },
-        setPageNumber: (state, action) => {
+        setLastId: (state, action) => {
             state.messagesLoaded = false;
-            state.messageParams = {...state.messageParams, ...action.payload}
-        },
-        setPagination: (state, action) => {
-            state.pagination = action.payload
+            state.messageParams.lastId = action.payload;
         },
         resetMessageParams: (state) => {
             state.messageParams = initParams()
@@ -116,7 +112,6 @@ export const messagesSlice = createSlice({
             action.payload.forEach((message) => {
                 message.postedDate = new Date(message.postedDate)!;
             });
-            console.log(state.messageParams.selectedDate);
             
             if (state.messageParams.selectedDate) {
                 messagesAdapter.setAll(state, action.payload.reverse());
@@ -132,6 +127,8 @@ export const messagesSlice = createSlice({
             }
             state.status = 'idle';
             state.messagesLoaded = true;
+            state.bringMorePosts = action.payload.length === 6;
+            state.messageLength = state.ids.length;
          
         });
         builder.addCase(fetchMessagesAsync.rejected, (state, action) => {
@@ -154,4 +151,4 @@ export const messagesSlice = createSlice({
 
 export const messageSelectors = messagesAdapter.getSelectors((state: RootState) => state.messages);
 
-export const { setMessageParams, setPageNumber, setPagination, resetMessageParams } = messagesSlice.actions;
+export const { setSelectedDate, setLastId, resetMessageParams } = messagesSlice.actions;

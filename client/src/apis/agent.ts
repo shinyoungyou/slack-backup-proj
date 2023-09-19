@@ -1,7 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { Message } from "@/models/message";
 import { AxiosRequestConfig } from "axios";
-import { PaginatedResult } from "@/models/pagination";
 import { toast } from "react-toastify";
 import { router } from "@/router/Routes";
 
@@ -25,11 +24,6 @@ const responseBody = (response: AxiosResponse) => response.data;
 
 axios.interceptors.response.use(async response => {
   if (process.env.NODE_ENV === 'development') await sleep();
-  const pagination = response.headers['pagination'];
-  if (pagination) {
-      response.data = new PaginatedResult(response.data, JSON.parse(pagination));
-      return response;
-  }
   return response
 }, (error: AxiosError) => {
   const {data, status} = error.response as AxiosResponse;

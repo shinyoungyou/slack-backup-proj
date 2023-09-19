@@ -9,3 +9,8 @@ export interface Message {
   postedDate: Date;
   modifiedDate: Date | null;
 }
+
+export interface MessageParams {
+  lastId: string;
+  selectedDate?: string;
+}

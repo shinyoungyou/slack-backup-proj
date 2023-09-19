@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from "@/stores/configureStore";
 import MessageListItem from "./MessageListItem";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import DateFilters from "./DateFilters";
-import { messageSelectors, fetchMessagesAsync, selectMessagesByDate, setMessageParams } from "@/stores/messagesSlice";
+import { messageSelectors, fetchMessagesAsync, selectMessagesByDate, setSelectedDate } from "@/stores/messagesSlice";
 import { Message } from "@/models/message";
 import { format, parse } from 'date-fns';
 
@@ -32,7 +32,7 @@ export default function MessageList() {
       });
     } else {
       let original = parse(selectDate, 'EEE, MMM dd yyyy', new Date());
-      dispatch(setMessageParams({ selectedDate: original.toISOString() }));
+      dispatch(setSelectedDate(original.toISOString()));
     }
 
     setSelectDate('');
