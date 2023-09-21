@@ -56,17 +56,17 @@ export default function MessageList() {
   return (
     <>
       <Grid container spacing={4}>
-          {messages.map((message, index) => (
-             <Grid key={message.slackId} item xs={12}>
-              {showDateLabel(messages[index-1], message) && 
-                <>
-                {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>}
-                <DateFilters group={formattedDate(message.postedDate)} scrollToSpecificDate={scrollToSpecificDate}  />
-                </>
-              }
-              <MessageListItem message={message} />
-            </Grid>
-          ))}
+        {messages.map((message, index) => (
+           <Grid key={message.slackId} item xs={12}>
+            {showDateLabel(messages[index-1], message) && 
+              <>
+              {selectDate === formattedDate(message.postedDate) && <div ref={dateRef}></div>}
+              <DateFilters group={formattedDate(message.postedDate)} scrollToSpecificDate={scrollToSpecificDate}  />
+              </>
+            }
+            <MessageListItem message={message} />
+          </Grid>
+        ))}
       </Grid>
     </>
   );

@@ -18,14 +18,17 @@ interface MessagesState {
 
 function getAxiosParams(messageParams: MessageParams) {
   const params = new URLSearchParams();
-  params.append("direction", messageParams.direction);
-  // if (messageParams.searchTerm) params.append('searchTerm', messageParams.searchTerm);
   if (messageParams.selectedDate) {
     params.append("selectedDate", messageParams.selectedDate.toString());
+  } else if (messageParams.search && messageParams.search !== "") {
+    params.append("search", messageParams.search);
+  } else {
+    if (messageParams.lastId !== "") {
+      params.append("lastId", messageParams.lastId.toString());
+    }
+    params.append("direction", messageParams.direction);
   }
-  if (messageParams.lastId !== "") {
-    params.append("lastId", messageParams.lastId.toString());
-  }
+
   return params;
 }
 
@@ -60,6 +63,7 @@ function initParams(): MessageParams {
     lastId: "",
     selectedDate: "",
     direction: "next",
+    search: ""
   };
 }
 
@@ -85,9 +89,8 @@ export const messagesSlice = createSlice({
     // },
     setSelectedDate: (state, action) => {
       if (action.payload !== "") {
-        state.messagesLoaded = false;
         state.messageParams.selectedDate = action.payload;
-        // state.messageParams.lastId = 1;
+        state.messagesLoaded = false;
       } else {
         state.messageParams.selectedDate = action.payload;
       }
@@ -96,11 +99,18 @@ export const messagesSlice = createSlice({
       state.messageParams.direction = action.payload;
     },
     setLastId: (state, action) => {
-      state.messagesLoaded = false;
       state.messageParams.lastId = action.payload;
+      state.messagesLoaded = false;
+    },
+    setSearchParam: (state, action) => {    
+      state.messageParams.search = action.payload;
+      state.messagesLoaded = false;
     },
     resetMessageParams: (state) => {
       state.messageParams = initParams();
+    },
+    resetMessages: (state) => {
+      state.messages = [];
     },
   },
   extraReducers: (builder) => {
@@ -115,8 +125,10 @@ export const messagesSlice = createSlice({
 
       if (state.messageParams.selectedDate) {
         state.messages = action.payload;
-        // state.hasPrev = true;
-        // state.hasNext = true;
+      } else if (state.messageParams.search) {
+        state.messages = action.payload;
+        state.hasPrev = false;
+        state.hasNext = false;
       } else {
         if (state.messageParams.direction === 'prev') {
           state.messages.unshift(...action.payload.reverse());
@@ -155,5 +167,5 @@ export const messagesSlice = createSlice({
   },
 });
 
-export const { setSelectedDate, setDirection, setLastId, resetMessageParams } =
+export const { setSelectedDate, setDirection, setLastId, setSearchParam, resetMessageParams, resetMessages } =
   messagesSlice.actions;

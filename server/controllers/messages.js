@@ -1,11 +1,10 @@
 const Message = require('../models/Message');
 const mongoose = require('mongoose');
-const { ObjectId } = require('mongoose').Types;
 
 /* READ */
 exports.getMessages = async (req, res) => {
   try {
-    const { lastId, selectedDate, direction } = req.query;
+    const { lastId, selectedDate, direction, search } = req.query;
     const limit = 6; // You can set your desired default page size here
     let where = {};
 
@@ -37,7 +36,9 @@ exports.getMessages = async (req, res) => {
       } else {
         res.status(200).json(messages);
       }
-    } else {
+    } 
+
+    if (direction) {
       if (lastId) {
         const lastMessage = await Message.findById(lastId);
 
@@ -58,8 +59,20 @@ exports.getMessages = async (req, res) => {
         // .sort({ postedDate: -1 }) // Sort by postedDate in descending order
         .limit(limit);
         res.status(200).json(messages);
-      
     }
+
+    if (search) {
+      const searchRegex = new RegExp(search, 'i'); // Case-insensitive search
+      where.text = searchRegex;
+
+      const searchMessages = await Message.find(where)
+        .select('-createdAt -updatedAt')
+        .sort({ postedDate: -1 }) // Sort by postedDate in descending order
+        .limit(limit);
+
+      res.status(200).json(searchMessages);
+    }
+
   } catch (err) {
     res.status(404).json({ message: err.message });
   }

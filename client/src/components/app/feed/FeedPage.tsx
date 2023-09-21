@@ -8,10 +8,11 @@ import {
   setDirection
 } from "@/stores/messagesSlice";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
+import MessageSearch from "./MessageSearch";
 // import { AutoSizer, InfiniteLoader, List, WindowScroller } from "react-virtualized";
 
 export default function FeedPage() {
-  const { messagesLoaded, hasPrev, hasNext, messages } = useAppSelector((state) => state.messages);
+  const { messagesLoaded, messageParams, hasPrev, hasNext, messages } = useAppSelector((state) => state.messages);
   const [loadingNext, setLoadingNext] = useState(false);
   const dispatch = useAppDispatch();
   const nextRef = useRef<HTMLDivElement>(null);
@@ -98,13 +99,17 @@ export default function FeedPage() {
   };
 
   return (
-    <div onWheel={onWheel}>
-      <MessageList />
-      {messages.length > 0 && !messagesLoaded && <MessageListItemSkeleton />}
-      <div
-        style={{ height: hasNext ? "300px" : "70px" }}
-        ref={nextRef}
-      ></div>
-    </div>
+  <>
+      <MessageSearch />
+      <div onWheel={onWheel}>
+        <MessageList />
+        {messages.length > 0 && !messagesLoaded && <MessageListItemSkeleton />}
+        <div
+          style={{ height: hasNext ? "300px" : "70px" }}
+          ref={nextRef}
+        ></div>
+        {messages.length === 0 && messageParams?.search !== "" && "No search results found"}
+      </div>
+    </>
   );
 }
