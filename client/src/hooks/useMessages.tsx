@@ -1,24 +1,31 @@
 import { useEffect, useState } from "react";
-import { messageSelectors, fetchMessagesAsync } from "@/stores/messagesSlice";
+import { fetchMessagesAsync } from "@/stores/messagesSlice";
 import { useAppSelector, useAppDispatch } from "@/stores/configureStore";
 
 export default function useMessages() {
-  const messages = useAppSelector(messageSelectors.selectAll);
-  const { messagesLoaded, messageLength } = useAppSelector((state) => state.messages);
+  const { messagesLoaded, messages, messageParams } = useAppSelector((state) => state.messages);
   const dispatch = useAppDispatch();
   const [prevLastId, setPrevLastId] = useState<string>('');
+  const [scrollPosition, setScrollPosition] = useState();
+
 
   useEffect(() => {
-    let currentLastId = messages[messages.length-1]?.id || '';
-    if (!messagesLoaded && (prevLastId !== currentLastId || messages.length === 0)) {
+    // 현재 스크롤 위치를 저장합니다.
+    // const currentScrollY = window.scrollY;
+
+    let currentLastId = messageParams.lastId;
+    if (!messagesLoaded && (prevLastId !== currentLastId || messages.length === 0 || messageParams.selectedDate)) {
       dispatch(fetchMessagesAsync());
-      console.log("asdfasdf");
       setPrevLastId(currentLastId);
-      
+
+      // 스크롤 위치를 조정하여 이전 페이지가 로딩되도록 합니다.
+      // window.scrollTo({
+      //   top: currentScrollY,
+      //   behavior: "instant" as ScrollBehavior,
+      // });
+      // window.scrollTo(0, currentScrollY);
     };
-    console.log("prevLastId: "+prevLastId);
-    console.log("currentLastId: "+currentLastId);
-  }, [messagesLoaded]);
+  }, [messagesLoaded, messageParams.lastId]);
 
   return {
     messages,

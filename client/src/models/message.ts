@@ -13,4 +13,5 @@ export interface Message {
 export interface MessageParams {
   lastId: string;
   selectedDate?: string;
+  direction: 'prev' | 'next';
 }
