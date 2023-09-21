@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { Grid, Paper } from "@mui/material";
 import MessageList from "./MessageList";
 import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
@@ -7,12 +7,11 @@ import {
   setSelectedDate,
   setDirection
 } from "@/stores/messagesSlice";
+import MessageListItemSkeleton from "./MessageListItemSkeleton";
 // import { AutoSizer, InfiniteLoader, List, WindowScroller } from "react-virtualized";
 
 export default function FeedPage() {
-  const { messagesLoaded, hasPrev, hasNext, messages } = useAppSelector(
-    (state) => state.messages
-  );
+  const { messagesLoaded, hasPrev, hasNext, messages } = useAppSelector((state) => state.messages);
   const [loadingNext, setLoadingNext] = useState(false);
   const dispatch = useAppDispatch();
   const nextRef = useRef<HTMLDivElement>(null);
@@ -82,7 +81,7 @@ export default function FeedPage() {
 
     if (
       wheelPosition.current.move < -10 &&
-      scrollPosition.current.default < 300 &&
+      scrollPosition.current.default < 700 &&
       !isCalled.current
     ) {
       !loadingNext && hasPrev && handleGetPrev();
@@ -101,6 +100,7 @@ export default function FeedPage() {
   return (
     <div onWheel={onWheel}>
       <MessageList />
+      {messages.length > 0 && !messagesLoaded && <MessageListItemSkeleton />}
       <div
         style={{ height: hasNext ? "300px" : "70px" }}
         ref={nextRef}

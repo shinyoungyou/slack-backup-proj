@@ -6,7 +6,6 @@ const { ObjectId } = require('mongoose').Types;
 exports.getMessages = async (req, res) => {
   try {
     const { lastId, selectedDate, direction } = req.query;
-    console.log("lastId: "+lastId);
     const limit = 6; // You can set your desired default page size here
     let where = {};
 
@@ -24,7 +23,20 @@ exports.getMessages = async (req, res) => {
         .sort({ postedDate: -1 }) // Sort by postedDate in descending order
         .limit(limit);
       
-      res.status(200).json(messages);
+      if (messages.length < 4) {
+        where.postedDate = {
+          $gte: startDate,
+        };
+
+        const moreMessages = await Message.find(where)
+          .select('-createdAt -updatedAt')
+          .sort({ postedDate: 1 }) // Sort by postedDate in descending order
+          .limit(limit);
+        
+        res.status(200).json(moreMessages.reverse());
+      } else {
+        res.status(200).json(messages);
+      }
     } else {
       if (lastId) {
         const lastMessage = await Message.findById(lastId);
