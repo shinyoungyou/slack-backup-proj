@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Box, List, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import TagIcon from "@mui/icons-material/Tag";
-import { fetchChannelsAsync, setChannel } from "@/stores/channelsSlice";
+import { setChannel } from "@/stores/channelsSlice";
 import { useAppSelector, useAppDispatch } from "@/stores/configureStore";
 
 interface Props {
@@ -11,10 +11,6 @@ interface Props {
 export default function ChannelsDrawer({ toggleDrawer }: Props) {
   const { channels } = useAppSelector((state) => state.channels);
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(fetchChannelsAsync());
-  }, [])
 
   return (
     <Box
@@ -30,7 +26,7 @@ export default function ChannelsDrawer({ toggleDrawer }: Props) {
       <List>
         {channels.map((channel, index) => (
           <ListItem key={channel.slackId} disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={() => dispatch(setChannel(channel))}>
               <ListItemIcon>
                 <TagIcon />
               </ListItemIcon>

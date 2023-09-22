@@ -55,7 +55,7 @@ export default function MessageList() {
 
   return (
     <>
-      <Grid container spacing={4}>
+      <Grid container spacing={1} mt={1}>
         {messages.map((message, index) => (
            <Grid key={message.slackId} item xs={12}>
             {showDateLabel(messages[index-1], message) && 

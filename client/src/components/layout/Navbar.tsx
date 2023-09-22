@@ -12,8 +12,11 @@ import Drawer from '@mui/material/Drawer';
 
 import * as React from 'react';
 import ChannelsDrawer from './ChannelsDrawer';
+import { useAppSelector, useAppDispatch } from "@/stores/configureStore";
 
 export default function Navbar() {
+  const { channel } = useAppSelector((state) => state.channels);
+
   const [value, setValue] = useState(1);
   const [anchor, setAnchor] = useState(false);
 
@@ -45,7 +48,7 @@ export default function Navbar() {
         }}
       >
         <BottomNavigationAction onClick={toggleDrawer(true)} label="Channels" icon={<ReadMoreIcon /> } />
-        <BottomNavigationAction component={NavLink} to="/feed" label="Feed" icon={<HomeIcon /> } />
+        <BottomNavigationAction component={NavLink} to={`/${channel?.name}/feed`} label="Feed" icon={<HomeIcon /> } />
         <BottomNavigationAction component={NavLink} to="/feed" label="Write" icon={<BorderColorIcon />} />
         <BottomNavigationAction component={NavLink} to="/feed"
           label="Profile"

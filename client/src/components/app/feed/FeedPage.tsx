@@ -2,11 +2,7 @@ import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { Grid, Paper } from "@mui/material";
 import MessageList from "./MessageList";
 import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
-import {
-  setLastId,
-  setSelectedDate,
-  setDirection
-} from "@/stores/messagesSlice";
+import { setLastId, setSelectedDate, setDirection } from "@/stores/messagesSlice";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import MessageSearch from "./MessageSearch";
 // import { AutoSizer, InfiniteLoader, List, WindowScroller } from "react-virtualized";
@@ -81,7 +77,7 @@ export default function FeedPage() {
     wheelPosition.current.move = event.deltaY;
 
     if (
-      wheelPosition.current.move < -10 &&
+      wheelPosition.current.move < -2 &&
       scrollPosition.current.default < 700 &&
       !isCalled.current
     ) {
@@ -91,7 +87,7 @@ export default function FeedPage() {
       return;
     }
 
-    if (wheelPosition.current.move > -10 && isCalled.current) {
+    if (wheelPosition.current.move > -2 && isCalled.current) {
       isCalled.current = false;
 
       return;
@@ -99,9 +95,9 @@ export default function FeedPage() {
   };
 
   return (
-  <>
-      <MessageSearch />
+    <>
       <div onWheel={onWheel}>
+        <MessageSearch />
         <MessageList />
         {messages.length > 0 && !messagesLoaded && <MessageListItemSkeleton />}
         <div

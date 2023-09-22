@@ -11,7 +11,8 @@ exports.getMessages = async (req, res) => {
     if (selectedDate) {
       const startDate = new Date(selectedDate);
       const endDate = new Date(selectedDate);
-      endDate.setHours(23, 59, 59, 999); 
+      endDate.setHours(40, 59, 59, 999); 
+      // endDate.setHours(23, 59, 59, 999); 
 
       where.postedDate = {
         $lte: endDate,
