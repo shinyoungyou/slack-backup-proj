@@ -70,8 +70,14 @@ const Messages = {
   details: (id: string) => requests.get(`/messages/${id}`),
 };
 
+const Channels = {
+  list: () => requests.get(`/channels`),
+  details: (id: string) => requests.get(`/channels/${id}`),
+};
+
 const agent = {
   Messages,
+  Channels
 };
 
 export default agent;

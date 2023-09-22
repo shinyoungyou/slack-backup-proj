@@ -59,7 +59,8 @@ app.post('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/messages', require('./routes/messages'))
+app.use('/api/channels', require('./routes/channels'));
+app.use('/api/messages', require('./routes/messages'));
 
 mongoose.connection.once('open', () => {
   console.log('Connected to MongoDB')

@@ -11,7 +11,6 @@ interface MessagesState {
   hasPrev: boolean;
   hasNext: boolean;
   messagesLoaded: boolean; // messages load trigger
-  messageLength: number;
   status: string;
   messageParams: MessageParams;
 }
@@ -74,7 +73,6 @@ export const messagesSlice = createSlice({
     hasPrev: true,
     hasNext: true,
     messagesLoaded: false,
-    messageLength: 0,
     status: "idle",
     messageParams: initParams(),
   } as MessagesState,
