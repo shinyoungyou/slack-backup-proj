@@ -13,6 +13,9 @@ const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET);
 slackEvents.on("message", async (event, respond) => {
   console.log(event);
 
+  /**
+   * bring channel list
+   */
   const totalChannelLength = await Message.countDocuments();
   if (totalChannelLength === 0) {
     const { channels } = await client.conversations.list();
@@ -24,9 +27,11 @@ slackEvents.on("message", async (event, respond) => {
       })
       await newChannel.save();
     })
-    
   }
 
+  /**
+   * get updated message
+   */
   if (event.subtype === "message_changed") {
     const message = await Message.findOne({
       slackId: event.previous_message.client_msg_id,
@@ -37,12 +42,20 @@ slackEvents.on("message", async (event, respond) => {
 
     const updatedMessage = await message.save();
     console.log(`Message updated to MongoDB: ${updatedMessage.text}`);
+
+    /**
+     * get deleted message info
+     */
   } else if (event.subtype === "message_deleted") {
     await Message.findOneAndDelete({
       slackId: event.previous_message.client_msg_id,
     });
 
     console.log(`Message deleted`);
+
+    /**
+     * get a new message created
+     */
   } else if (event.subtype === undefined) {
     // Fetch user info using the user's ID
     const userResponse = await client.users.info({ user: event.user });

@@ -17,6 +17,7 @@ interface MessagesState {
 
 function getAxiosParams(messageParams: MessageParams) {
   const params = new URLSearchParams();
+  params.append("channelId", messageParams.channelId);
   if (messageParams.selectedDate) {
     params.append("selectedDate", messageParams.selectedDate.toString());
   } else if (messageParams.search && messageParams.search !== "") {
@@ -62,7 +63,8 @@ function initParams(): MessageParams {
     lastId: "",
     selectedDate: "",
     direction: "next",
-    search: ""
+    search: "",
+    channelId: ""
   };
 }
 
@@ -102,6 +104,11 @@ export const messagesSlice = createSlice({
     },
     setSearchParam: (state, action) => {    
       state.messageParams.search = action.payload;
+      state.messagesLoaded = false;
+    },
+    setChannelIdParam: (state, action) => {    
+      state.messageParams.lastId = ""
+      state.messageParams.channelId = action.payload;
       state.messagesLoaded = false;
     },
     resetMessageParams: (state) => {
@@ -165,5 +172,5 @@ export const messagesSlice = createSlice({
   },
 });
 
-export const { setSelectedDate, setDirection, setLastId, setSearchParam, resetMessageParams, resetMessages } =
+export const { setSelectedDate, setDirection, setLastId, setSearchParam, setChannelIdParam, resetMessageParams, resetMessages } =
   messagesSlice.actions;

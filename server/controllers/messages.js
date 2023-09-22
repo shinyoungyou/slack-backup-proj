@@ -4,9 +4,10 @@ const mongoose = require('mongoose');
 /* READ */
 exports.getMessages = async (req, res) => {
   try {
-    const { lastId, selectedDate, direction, search } = req.query;
+    const { lastId, selectedDate, direction, search, channelId } = req.query;
     const limit = 6; // You can set your desired default page size here
     let where = {};
+    where.channel = channelId;
 
     if (selectedDate) {
       const startDate = new Date(selectedDate);

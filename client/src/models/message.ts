@@ -15,4 +15,5 @@ export interface MessageParams {
   selectedDate?: string;
   direction: 'prev' | 'next';
   search?: string;
+  channelId: string;
 }

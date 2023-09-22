@@ -5,10 +5,10 @@ import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
 import { setLastId, setSelectedDate, setDirection } from "@/stores/messagesSlice";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import MessageSearch from "./MessageSearch";
-// import { AutoSizer, InfiniteLoader, List, WindowScroller } from "react-virtualized";
 
 export default function FeedPage() {
   const { messagesLoaded, messageParams, hasPrev, hasNext, messages } = useAppSelector((state) => state.messages);
+  const { channel } = useAppSelector((state) => state.channels);
   const [loadingNext, setLoadingNext] = useState(false);
   const dispatch = useAppDispatch();
   const nextRef = useRef<HTMLDivElement>(null);
@@ -77,7 +77,7 @@ export default function FeedPage() {
     wheelPosition.current.move = event.deltaY;
 
     if (
-      wheelPosition.current.move < -2 &&
+      wheelPosition.current.move < -7 &&
       scrollPosition.current.default < 700 &&
       !isCalled.current
     ) {
@@ -87,7 +87,7 @@ export default function FeedPage() {
       return;
     }
 
-    if (wheelPosition.current.move > -2 && isCalled.current) {
+    if (wheelPosition.current.move > -7 && isCalled.current) {
       isCalled.current = false;
 
       return;
@@ -96,16 +96,20 @@ export default function FeedPage() {
 
   return (
     <>
-      <div onWheel={onWheel}>
-        <MessageSearch />
-        <MessageList />
-        {messages.length > 0 && !messagesLoaded && <MessageListItemSkeleton />}
-        <div
-          style={{ height: hasNext ? "300px" : "70px" }}
-          ref={nextRef}
-        ></div>
-        {messages.length === 0 && messageParams?.search !== "" && "No search results found"}
-      </div>
+      {channel ?
+        <div onWheel={onWheel}>
+          <MessageSearch />
+          <MessageList />
+          {messages.length > 0 && !messagesLoaded && <MessageListItemSkeleton />}
+          <div
+            style={{ height: hasNext ? "300px" : "70px" }}
+            ref={nextRef}
+          ></div>
+          {messages.length === 0 && messageParams?.search !== "" && "No search results found"}
+        </div> 
+        :
+        <div>select the channel</div>
+        }
     </>
   );
 }
