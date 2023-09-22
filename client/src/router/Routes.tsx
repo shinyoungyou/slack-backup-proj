@@ -10,10 +10,10 @@ const routes: RouteObject[] = [
     element: <App />,
     children: [
       { path: "", element: <Navigate to="feed" /> },
-      // { path: "", element: <Navigate to=":channel/feed" /> },
+      // { path: "", element: <Navigate to=":channelName/feed" /> },
       { path: "feed", element: <FeedPage /> },
       { 
-        path: ":channel",
+        path: ":channelName",
         children: [
           { path: "feed", element: <FeedPage /> },
         ] 

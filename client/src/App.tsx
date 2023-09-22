@@ -9,19 +9,12 @@ import { router } from "@/router/Routes";
 function App() {
   const { channel } = useAppSelector((state) => state.channels);
   const dispatch = useAppDispatch();
-
+ 
   useMessages();
 
   useEffect(() => {
     dispatch(fetchChannelsAsync());
   }, [])
-
-  useEffect(() => {
-    if (channel) {
-      router.navigate(`/${channel.name}/feed`);
-    }
-  }, [channel])
-
 
   return (
     <>

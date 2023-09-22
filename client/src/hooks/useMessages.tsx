@@ -11,7 +11,7 @@ export default function useMessages() {
 
   useEffect(() => {
     let currentLastId = messageParams.lastId;
-    if (!messagesLoaded 
+    if (messageParams.channelId !== "" && !messagesLoaded 
         && (prevLastId !== currentLastId || messages.length === 0 
         || messageParams.selectedDate 
         || prevSearchTerm !== messageParams.search

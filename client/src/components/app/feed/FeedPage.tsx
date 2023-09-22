@@ -1,14 +1,17 @@
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { Grid, Paper } from "@mui/material";
+import { Box, Grid, Paper, Typography } from "@mui/material";
 import MessageList from "./MessageList";
 import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
 import { setLastId, setSelectedDate, setDirection } from "@/stores/messagesSlice";
 import MessageListItemSkeleton from "./MessageListItemSkeleton";
 import MessageSearch from "./MessageSearch";
+import { useParams } from "react-router-dom";
+import { setChannel } from "@/stores/channelsSlice";
+import { setChannelIdParam } from "@/stores/messagesSlice";
 
 export default function FeedPage() {
   const { messagesLoaded, messageParams, hasPrev, hasNext, messages } = useAppSelector((state) => state.messages);
-  const { channel } = useAppSelector((state) => state.channels);
+  const { channels, channel } = useAppSelector((state) => state.channels);
   const [loadingNext, setLoadingNext] = useState(false);
   const dispatch = useAppDispatch();
   const nextRef = useRef<HTMLDivElement>(null);
@@ -16,6 +19,7 @@ export default function FeedPage() {
   const wheelPosition = useRef({ default: 0, move: 0, scroll: 0 });
   const scrollPosition = useRef({ default: 0 });
   const isCalled = useRef(false);
+  const { channelName } = useParams();
 
   useEffect(() => {
     if (messagesLoaded) {
@@ -23,6 +27,15 @@ export default function FeedPage() {
       dispatch(setSelectedDate(""));
     }
   }, [messagesLoaded]);
+
+  useEffect(() => {    
+    const selectedChannel = channels.find(channel => channel.name === channelName);
+    
+    if (selectedChannel) {
+      dispatch(setChannel(selectedChannel));
+      dispatch(setChannelIdParam(selectedChannel.slackId));
+    }
+  }, [channelName, channels, dispatch]) 
 
   useEffect(() => {
     const observer = new IntersectionObserver(onIntersection);
@@ -108,7 +121,14 @@ export default function FeedPage() {
           {messages.length === 0 && messageParams?.search !== "" && "No search results found"}
         </div> 
         :
-        <div>select the channel</div>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="90vh"
+        >
+          <Typography>select a channel</Typography> 
+        </Box>
         }
     </>
   );

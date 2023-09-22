@@ -1,10 +1,7 @@
-import { useEffect } from "react";
 import { Box, List, Divider, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import TagIcon from "@mui/icons-material/Tag";
-import { setChannel } from "@/stores/channelsSlice";
-import { setChannelIdParam } from "@/stores/messagesSlice";
-import { useAppSelector, useAppDispatch } from "@/stores/configureStore";
-import { Channel } from "@/models/channel";
+import { useAppSelector } from "@/stores/configureStore";
+import { router } from "@/router/Routes";
 
 interface Props {
   toggleDrawer: any;
@@ -12,12 +9,7 @@ interface Props {
 
 export default function ChannelsDrawer({ toggleDrawer }: Props) {
   const { channels } = useAppSelector((state) => state.channels);
-  const dispatch = useAppDispatch();
 
-  function handleChannelClick (channel: Channel) {
-    dispatch(setChannel(channel))
-    dispatch(setChannelIdParam(channel.slackId));
-  }
   return (
     <Box
       sx={{ width: 250 }}
@@ -32,7 +24,7 @@ export default function ChannelsDrawer({ toggleDrawer }: Props) {
       <List>
         {channels.map((channel, index) => (
           <ListItem key={channel.slackId} disablePadding>
-            <ListItemButton onClick={() => handleChannelClick(channel)}>
+            <ListItemButton onClick={() => router.navigate(`/${channel.name}/feed`)}>
               <ListItemIcon>
                 <TagIcon />
               </ListItemIcon>
