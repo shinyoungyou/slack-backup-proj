@@ -116,6 +116,7 @@ export const messagesSlice = createSlice({
     },
     resetMessages: (state) => {
       state.messages = [];
+      state.messageParams.direction = 'next';
     },
   },
   extraReducers: (builder) => {

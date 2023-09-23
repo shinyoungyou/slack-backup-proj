@@ -91,7 +91,7 @@ export default function FeedPage() {
 
     if (
       wheelPosition.current.move < -7 &&
-      scrollPosition.current.default < 700 &&
+      scrollPosition.current.default < 500 &&
       !isCalled.current
     ) {
       !loadingNext && hasPrev && handleGetPrev();

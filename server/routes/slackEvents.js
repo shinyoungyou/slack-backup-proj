@@ -9,6 +9,31 @@ const Channel = require("../models/Channel");
 // Initialize the Slack Events Adapter
 const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET);
 
+slackEvents.on("channel_created", async (event, respond) => {
+  console.log(event);
+
+  const newChannel = new Channel({
+    slackId: event.channel.id,
+    name: event.channel.name,
+    workspace: event.channel.context_team_id
+  })
+  await newChannel.save();
+  console.log(`Channel saved to MongoDB: ${newChannel.name}`);
+});
+
+slackEvents.on("channel_name", async (event, respond) => {
+  console.log(event);
+
+  const channel = await Channel.findOne({
+    slackId: event.channel,
+  });
+
+  channel.name = event.name;
+
+  const updatedChannel = await channel.save();
+  console.log(`Channel updated to MongoDB: ${updatedChannel.name}`);
+});
+
 // Handle the "message" event
 slackEvents.on("message", async (event, respond) => {
   console.log(event);
@@ -16,14 +41,16 @@ slackEvents.on("message", async (event, respond) => {
   /**
    * bring channel list
    */
-  const totalChannelLength = await Message.countDocuments();
+  const totalChannelLength = await Channel.countDocuments();
+  console.log("totalChannelLength: "+totalChannelLength);
   if (totalChannelLength === 0) {
     const { channels } = await client.conversations.list();
 
     channels.forEach(async channel => {
       const newChannel = new Channel({
         slackId: channel.id,
-        name: channel.name
+        name: channel.name,
+        workspace: event.team
       })
       await newChannel.save();
     })
@@ -52,6 +79,19 @@ slackEvents.on("message", async (event, respond) => {
     });
 
     console.log(`Message deleted`);
+
+    /**
+     * slack event: channel_rename (should be..)
+     */
+  } else if (event.subtype === "channel_name") {
+    const channel = await Channel.findOne({
+      slackId: event.channel,
+    });
+  
+    channel.name = event.name;
+  
+    const updatedChannel = await channel.save();
+    console.log(`Channel updated to MongoDB: ${updatedChannel.name}`);
 
     /**
      * get a new message created

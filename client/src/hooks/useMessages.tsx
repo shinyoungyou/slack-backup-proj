@@ -17,7 +17,8 @@ export default function useMessages() {
         || prevSearchTerm !== messageParams.search
         || prevChannelId !== messageParams.channelId)
       ) {
-      if ((prevSearchTerm !== "" && messageParams.search === "") || (prevChannelId !== messageParams.channelId)) {
+      // if ((prevSearchTerm !== "" && messageParams.search === "") || (prevChannelId !== messageParams.channelId)) {
+      if (prevSearchTerm !== "" && messageParams.search === "") {
         dispatch(resetMessages());
       }
       dispatch(fetchMessagesAsync());

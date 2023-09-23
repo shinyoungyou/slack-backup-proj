@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/stores/configureStore";
+import { useAppDispatch } from "@/stores/configureStore";
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -9,10 +9,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import { debounce } from "@mui/material";
 import { setSearchParam } from "@/stores/messagesSlice";
 
-
 export default function MessageSearch() {
-  const { messageParams } = useAppSelector(state => state.messages);
-  const [searchTerm, setSearchTerm] = useState(messageParams.search);
+  // const { messageParams } = useAppSelector(state => state.messages);
+  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState(messageParams.search);
   const dispatch = useAppDispatch();
 
   const debouncedSearch = debounce((event: any) => {
